@@ -1,0 +1,11 @@
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = 'https://rmlxzhhsvcgadzcjpyxm.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_IilGbp1_EtcwTBwerAdyyg_4Bd1Xtn8';
+  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  async function getPalet() {
+    const { data, error } = await supabase.from('palet').select('*');
+    console.log(data);
+  }
+</script>
