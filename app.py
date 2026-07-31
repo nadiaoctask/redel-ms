@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 from supabase import create_client, Client
 from datetime import date
 import pandas as pd
@@ -17,40 +18,107 @@ try:
 except Exception as e:
     st.error(f"Gagal koneksi Supabase: {e}")
 
+# ==========================================
+# 1. KONFIGURASI HALAMAN & CUSTOM CSS SYSTEM
+# ==========================================
+st.set_page_config(
+    page_title="Redelivery Management System - WINGS",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# Inject Custom CSS & CDN FontAwesome
 st.markdown("""
-<style>
-    /* Background Utama */
-    .stApp {
-        background-color: #F2F5F8;
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+    /* Reset Layout Biar Pas 1 Layar (No Scroll) */
+    html, body, [data-testid="stAppViewContainer"] {
+        font-family: 'Poppins', sans-serif !important;
+        background-color: #F4F7FA !important;
+        overflow-x: hidden;
     }
     
-    /* Custom Card Style untuk Dashboard */
-    .kanban-card {
-        background-color: #FFFFFF;
-        border-radius: 12px;
-        padding: 15px 20px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.03);
-        border: 1px solid #E2E8F0;
+    .main .block-container {
+        padding-top: 1rem !important;
+        padding-bottom: 0rem !important;
+        max-width: 98% !important;
+    }
+
+    /* Sidebar Styling Smooth */
+    [data-testid="stSidebar"] {
+        background-color: #FFFFFF !important;
+        border-right: 1px solid #E2E8F0 !important;
     }
     
-    /* Tombol Utama Dark Azure */
+    /* Tombol Navigasi Custom (Tanpa Border Kaku) */
+    div[data-testid="stSidebar"] div.stButton > button {
+        background-color: transparent !important;
+        color: #475569 !important;
+        border: none !important;
+        border-radius: 8px !important;
+        text-align: left !important;
+        padding: 10px 16px !important;
+        font-weight: 500 !important;
+        font-size: 14px !important;
+        box-shadow: none !important;
+        transition: all 0.2s ease-in-out !important;
+    }
+
+    div[data-testid="stSidebar"] div.stButton > button:hover {
+        background-color: #F1F5F9 !important;
+        color: #0E4A6E !important;
+    }
+
+    div[data-testid="stSidebar"] div.stButton > button[kind="primary"] {
+        background-color: #0E4A6E !important;
+        color: #FFFFFF !important;
+        font-weight: 600 !important;
+    }
+
+    /* Primary Button Dark Azure (#0E4A6E) */
     div.stButton > button[kind="primary"] {
         background-color: #0E4A6E !important;
         color: #FFFFFF !important;
         border-radius: 10px !important;
         border: none !important;
         font-weight: 600 !important;
+        padding: 12px 20px !important;
+        box-shadow: 0 4px 12px rgba(14, 74, 110, 0.2) !important;
     }
-    
-    /* Sidebar Styling */
-    [data-testid="stSidebar"] {
+
+    /* Card Metrics Styling Presisi Canva */
+    .metric-container {
         background-color: #FFFFFF;
-        border-right: 1px solid #E2E8F0;
+        border-radius: 12px;
+        padding: 16px 24px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        border: 1px solid #E2E8F0;
+        display: flex;
+        align-items: center;
     }
-</style>
+
+    .metric-value {
+        font-size: 38px;
+        font-weight: 700;
+        color: #0E4A6E;
+        line-height: 1;
+    }
+
+    .metric-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #475569;
+    }
+
+    /* Hide Default Elements */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    </style>
 """, unsafe_allow_html=True)
 
-# Session State untuk Navigasi Samping
+# Session State Navigasi
 if 'active_nav' not in st.session_state:
     st.session_state['active_nav'] = "Dashboard"
 
@@ -83,49 +151,54 @@ def modal_tambah_palet():
                 st.error(f"Gagal menyimpan: {e}")
 
 # ==========================================
-# 3. SIDEBAR NAVBAR (NAVIGASI CUSTOM)
+# 3. SIDEBAR NAVBAR (NAVIGASI SMOOTH)
 # ==========================================
 with st.sidebar:
-    st.image("https://upload.wikimedia.org/wikipedia/commons/4/47/Wings_Logo.svg", width=120)
-    st.markdown("### **Redelivery Management System**")
-    st.caption("Supervisor Panel: **Suliadi**")
-    st.divider()
+    st.image("https://upload.wikimedia.org/wikipedia/commons/4/47/Wings_Logo.svg", width=110)
+    st.markdown("<h4 style='color:#0E4A6E; margin-bottom:20px;'>Redelivery System</h4>", unsafe_allow_html=True)
     
-    def menu_item(label, icon_name, nav_key):
+    def nav_item(label, nav_key):
         is_active = st.session_state['active_nav'] == nav_key
         btn_type = "primary" if is_active else "secondary"
-        if st.button(f"{icon_name}  {label}", key=f"nav_{nav_key}", use_container_width=True, type=btn_type):
+        if st.button(f"{label}", key=f"nav_{nav_key}", use_container_width=True, type=btn_type):
             st.session_state['active_nav'] = nav_key
             st.rerun()
 
     st.caption("MAIN MENU")
-    menu_item("Dashboard", "🏠", "Dashboard")
+    nav_item("Dashboard", "Dashboard")
     
     st.caption("FORMULIR")
-    menu_item("Penerimaan SKR", "📥", "Penerimaan SKR")
-    menu_item("Redelivery", "🚚", "Redelivery")
+    nav_item("Penerimaan SKR", "Penerimaan SKR")
+    nav_item("Redelivery", "Redelivery")
     
     st.caption("DATA")
-    menu_item("Data SKR Redel", "📊", "Data SKR Redel")
-    menu_item("Data Palet", "📦", "Data Palet")
-    menu_item("Laporan Rekap", "📄", "Laporan Rekap")
+    nav_item("Data SKR Redel", "Data SKR Redel")
+    nav_item("Data Palet", "Data Palet")
+    nav_item("Laporan Rekap", "Laporan Rekap")
     
     st.divider()
-    if st.button("🚪 Logout", use_container_width=True):
-        st.info("Logout berhasil")
+    if st.button("Logout", key="btn_logout", use_container_width=True):
+        st.toast("Logout berhasil")
+
+# Header User Info Atas Kanan
+c_head1, c_head2 = st.columns([4, 1])
+with c_head1:
+    st.markdown("<h2 style='color:#0E4A6E; font-weight:700; margin:0;'>Redelivery Management System</h2>", unsafe_allow_html=True)
+with c_head2:
+    st.markdown("""
+        <div style="text-align: right; font-size: 13px; color: #334155;">
+            <b>Suliadi</b><br><span style="color: #64748B;">Supervisor</span>
+        </div>
+    """, unsafe_allow_html=True)
+
+st.write("")
 
 # ==========================================
-# 4. HALAMAN 1: DASHBOARD UTAMA
+# 4. PAGE 1: DASHBOARD UTAMA (PRESISI CANVA)
 # ==========================================
 if st.session_state['active_nav'] == "Dashboard":
-    # Header Atas
-    c_h1, c_h2 = st.columns([4, 1])
-    with c_h1:
-        st.title("Redelivery Management System")
-    with c_h2:
-        st.markdown("<div style='text-align:right;'><b>Suliadi</b><br><span style='color:#666;'>Supervisor</span></div>", unsafe_allow_html=True)
-
-    # Fetch Realtime Data untuk Metric Cards
+    
+    # Fetch Data Realtime
     try:
         res_skr = supabase.table("skr_redel").select("status_skr").execute().data
         cnt_menunggu = sum(1 for item in res_skr if item['status_skr'] == 'Menunggu shipment baru')
@@ -134,88 +207,95 @@ if st.session_state['active_nav'] == "Dashboard":
     except:
         cnt_menunggu, cnt_parsial, cnt_selesai = 28, 10, 99
 
-    # Metrics Card Layout (Dark Azure Theme)
     st.markdown("##### **Status SKR Redelivery**")
+    
+    # 3 Metrics Card Canva Design
     m1, m2, m3 = st.columns(3)
     with m1:
         st.markdown(f"""
-            <div class="kanban-card" style="border-left: 6px solid #C0392B;">
-                <p style="color:#64748B; font-weight:600; margin:0;">Menunggu Shipment Redelivery</p>
-                <h1 style="color:#0E4A6E; margin:10px 0; font-size:42px;">{cnt_menunggu} <span style="font-size:16px; color:#94A3B8;">SKR</span></h1>
+            <div class="metric-container" style="border-left: 6px solid #C0392B;">
+                <div style="flex:1;">
+                    <div class="metric-label">Menunggu Shipment Redelivery</div>
+                    <div class="metric-value">{cnt_menunggu} <span style="font-size:14px; color:#94A3B8;">SKR</span></div>
+                </div>
             </div>
         """, unsafe_allow_html=True)
     with m2:
         st.markdown(f"""
-            <div class="kanban-card" style="border-left: 6px solid #F1C40F;">
-                <p style="color:#64748B; font-weight:600; margin:0;">Redelivery Parsial</p>
-                <h1 style="color:#0E4A6E; margin:10px 0; font-size:42px;">{cnt_parsial} <span style="font-size:16px; color:#94A3B8;">SKR</span></h1>
+            <div class="metric-container" style="border-left: 6px solid #F1C40F;">
+                <div style="flex:1;">
+                    <div class="metric-label">Redelivery Parsial</div>
+                    <div class="metric-value">{cnt_parsial} <span style="font-size:14px; color:#94A3B8;">SKR</span></div>
+                </div>
             </div>
         """, unsafe_allow_html=True)
     with m3:
         st.markdown(f"""
-            <div class="kanban-card" style="border-left: 6px solid #27AE60;">
-                <p style="color:#64748B; font-weight:600; margin:0;">Selesai Redelivery</p>
-                <h1 style="color:#0E4A6E; margin:10px 0; font-size:42px;">{cnt_selesai} <span style="font-size:16px; color:#94A3B8;">SKR</span></h1>
+            <div class="metric-container" style="border-left: 6px solid #27AE60;">
+                <div style="flex:1;">
+                    <div class="metric-label">Selesai Redelivery</div>
+                    <div class="metric-value">{cnt_selesai} <span style="font-size:14px; color:#94A3B8;">SKR</span></div>
+                </div>
             </div>
         """, unsafe_allow_html=True)
 
     st.write("")
     
-    # Cari Data Shipment Search Bar
-    with st.container():
-        col_s1, col_s2 = st.columns([5, 1])
-        with col_s1:
-            search_no_shipment = st.text_input("", placeholder="🔍  Masukkan Nomor Shipment...", label_visibility="collapsed")
-        with col_s2:
-            btn_cari = st.button("Cari", type="primary", use_container_width=True)
+    # Search Bar Shipment
+    col_s1, col_s2 = st.columns([5, 1])
+    with col_s1:
+        search_input = st.text_input("", placeholder="Masukkan Nomor Shipment...", label_visibility="collapsed")
+    with col_s2:
+        btn_cari = st.button("Cari", type="primary", use_container_width=True)
 
-    if search_no_shipment or btn_cari:
-        if search_no_shipment:
-            res_search = supabase.table("skr_redel").select("*, penempatan(nomor_palet)").eq("no_shipment", search_no_shipment.strip()).execute().data
-            if res_search:
-                data_item = res_search[0]
-                palet_list = [p['nomor_palet'] for p in data_item.get('penempatan', [])]
-                palet_str = ", ".join(palet_list) if palet_list else "-"
-                
-                st.success(f"✅ Data Shipment Ditemukan: **{data_item['no_shipment']}**")
-                c_a, c_b, c_c, c_d = st.columns(4)
-                c_a.metric("Nama Delman", data_item['nama_delman'])
-                c_b.metric("Nopol Kendaraan", data_item['nopol_kendaraan'])
-                c_c.metric("Jenis GR", data_item['jenis_gr'])
-                c_d.metric("Status SKR", data_item['status_skr'])
-                st.info(f"📦 **Lokasi Penempatan Palet:** `{palet_str}`")
+    if search_input or btn_cari:
+        if search_input:
+            res = supabase.table("skr_redel").select("*, penempatan(nomor_palet)").eq("no_shipment", search_input.strip()).execute().data
+            if res:
+                d = res[0]
+                palet_list = [p['nomor_palet'] for p in d.get('penempatan', [])]
+                st.success(f"Shipment Ditemukan: **{d['no_shipment']}** | Delman: {d['nama_delman']} | Nopol: {d['nopol_kendaraan']} | Status: {d['status_skr']}")
+                st.info(f"Lokasi Palet: {', '.join(palet_list) if palet_list else '-'}")
             else:
-                st.warning(f"❌ Nomor Shipment '{search_no_shipment}' tidak ditemukan di database.")
+                st.warning("Data Shipment tidak ditemukan.")
 
     st.write("")
     
-    # 2 Tombol Aksi Utama (Dark Azure Color #0E4A6E)
+    # 2 Tombol Utama Dark Azure (#0E4A6E)
     cb1, cb2 = st.columns(2)
     with cb1:
-        if st.button("📦   Penerimaan SKR", key="btn_main_in", use_container_width=True, type="primary"):
+        if st.button("Penerimaan SKR", key="btn_main_in", use_container_width=True, type="primary"):
             st.session_state['active_nav'] = "Penerimaan SKR"
             st.rerun()
     with cb2:
-        if st.button("🚚   Redelivery", key="btn_main_out", use_container_width=True, type="primary"):
+        if st.button("Redelivery", key="btn_main_out", use_container_width=True, type="primary"):
             st.session_state['active_nav'] = "Redelivery"
             st.rerun()
 
     st.write("")
-    st.button("📥   Download Laporan Rekapitulasi Hari Ini", use_container_width=True)
+    # Tombol Download Hijau
+    st.markdown("""
+        <style>
+        div.stButton > button[key="btn_dl"] {
+            background-color: #27AE60 !important;
+            color: white !important;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+    st.button("Download Laporan Rekapitulasi Hari Ini", key="btn_dl", use_container_width=True)
 
 # ==========================================
-# 5. HALAMAN 2: FORM PENERIMAAN SKR
+# 5. PAGE 2: FORM PENERIMAAN SKR
 # ==========================================
 elif st.session_state['active_nav'] == "Penerimaan SKR":
-    st.title("📥 Form Input Penerimaan SKR")
+    st.subheader("Penerimaan SKR (Inbound)")
     
-    # AMBIL DATA PALET REALTIME DARI DATABASE SUPABASE
+    # Ambil Palet Realtime
     try:
         palet_db = supabase.table("palet").select("nomor_palet").execute().data
         list_palet_options = [p['nomor_palet'] for p in palet_db] if palet_db else []
-    except Exception as e:
+    except:
         list_palet_options = []
-        st.error(f"Gagal memuat data palet: {e}")
 
     with st.container(border=True):
         st.markdown("##### **Masukkan Data Shipment**")
@@ -243,7 +323,6 @@ elif st.session_state['active_nav'] == "Penerimaan SKR":
                 st.error("No. Shipment wajib diisi!")
             else:
                 try:
-                    # Insert data SKR
                     supabase.table("skr_redel").insert({
                         "no_shipment": no_shipment.strip(),
                         "nama_delman": nama_delman,
@@ -253,7 +332,6 @@ elif st.session_state['active_nav'] == "Penerimaan SKR":
                         "status_skr": "Menunggu shipment baru"
                     }).execute()
                     
-                    # Insert Penempatan Palet & Update Status Palet jadi In Use
                     if selected_palet and selected_palet != "Belum ada palet":
                         supabase.table("penempatan").insert({
                             "nomor_palet": selected_palet,
@@ -266,16 +344,15 @@ elif st.session_state['active_nav'] == "Penerimaan SKR":
                     st.error(f"Gagal menyimpan data: {e}")
 
 # ==========================================
-# 6. HALAMAN 3: FORM REDELIVERY
+# 6. PAGE 3: FORM REDELIVERY
 # ==========================================
 elif st.session_state['active_nav'] == "Redelivery":
-    st.title("🚚 Form Redelivery (Pengeluaran Barang)")
+    st.subheader("Redelivery (Outbound)")
     
-    # Fetch SKR yang belum selesai
     try:
         skr_db = supabase.table("skr_redel").select("no_shipment").neq("status_skr", "Selesai").execute().data
         list_skr_options = [s['no_shipment'] for s in skr_db] if skr_db else []
-    except Exception as e:
+    except:
         list_skr_options = []
 
     with st.container(border=True):
@@ -303,7 +380,6 @@ elif st.session_state['active_nav'] == "Redelivery":
             with col_i2:
                 jenis_redel = st.radio("Jenis Redel", ["Parsial", "Full"], key=f"j_redel_{i}", horizontal=True)
             with col_i3:
-                # KONDISIONAL: Jika Full, checkbox hilang & otomatis True
                 if jenis_redel == "Parsial":
                     is_final = st.checkbox("Kiriman Terakhir? (Selesai)", key=f"fin_{i}")
                 else:
@@ -333,7 +409,6 @@ elif st.session_state['active_nav'] == "Redelivery":
             st.error("No. Shipment Baru wajib diisi!")
         else:
             try:
-                # Insert Redelivery Master
                 supabase.table("redelivery").insert({
                     "no_shipment_redel": no_shipment_redel.strip(),
                     "nama_delman": nama_delman_redel,
@@ -341,7 +416,6 @@ elif st.session_state['active_nav'] == "Redelivery":
                     "tanggal_pengiriman": str(tgl_pengiriman)
                 }).execute()
                 
-                # Insert Detail & Update Status SKR
                 for item in items_to_save:
                     if item["no_shipment"]:
                         supabase.table("detail_redel").insert({
@@ -359,22 +433,21 @@ elif st.session_state['active_nav'] == "Redelivery":
                 st.error(f"Gagal menyimpan data Redelivery: {e}")
 
 # ==========================================
-# 7. HALAMAN 4: DATA SKR REDEL (MONITORING)
+# 7. HALAMAN 4: MONITORING (DATA SKR REDEL)
 # ==========================================
 elif st.session_state['active_nav'] == "Data SKR Redel":
-    st.title("Data SKR Redelivery")
-    tab1, tab2 = st.tabs(["📥 TAB 1: PENERIMAAN SKR (IN)", "📤 TAB 2: REDELIVERY / KIRIM ULANG (OUT)"])
+    st.subheader("Data SKR Redelivery")
+    tab1, tab2 = st.tabs(["TAB 1: PENERIMAAN SKR (IN)", "TAB 2: REDELIVERY (OUT)"])
     
     with tab1:
         c_f1, c_f2, c_f3 = st.columns([3, 2, 2])
         with c_f1:
-            search_skr = st.text_input("🔍 CARI DATA", placeholder="Input No SKR / Nama Delman / ID Palet...")
+            search_skr = st.text_input("CARI DATA", placeholder="Input No SKR / Nama Delman / ID Palet...")
         with c_f2:
-            filter_gr = st.radio("📦 JENIS GR", ["Semua GR", "GR Sistem", "GR Turun Gudang"], horizontal=True)
+            filter_gr = st.radio("JENIS GR", ["Semua GR", "GR Sistem", "GR Turun Gudang"], horizontal=True)
         with c_f3:
-            filter_status = st.selectbox("🟢 STATUS SKR", ["Semua Status", "Menunggu shipment baru", "Parsial", "Selesai"])
+            filter_status = st.selectbox("STATUS SKR", ["Semua Status", "Menunggu shipment baru", "Parsial", "Selesai"])
 
-        # Fetch Data SKR Realtime
         data_skr = supabase.table("skr_redel").select("*, penempatan(nomor_palet), detail_redel(*)").execute().data
         
         if data_skr:
@@ -391,37 +464,35 @@ elif st.session_state['active_nav'] == "Data SKR Redel":
                 palet_list = [p['nomor_palet'] for p in item.get('penempatan', [])]
                 palet_str = ", ".join(palet_list) if palet_list else "-"
                 
-                with st.expander(f"▼ {item['no_shipment']} | GR: {item['jenis_gr']} | Palet: {palet_str} | Status: {item['status_skr']}"):
+                with st.expander(f"{item['no_shipment']} | GR: {item['jenis_gr']} | Palet: {palet_str} | Status: {item['status_skr']}"):
                     st.write(f"**Delman:** {item['nama_delman']} | **Nopol:** {item['nopol_kendaraan']} | **Tgl Masuk:** {item['tanggal_penerimaan']}")
                     details = item.get('detail_redel', [])
                     if details:
-                        st.markdown("**🚚 Detail Histori Redelivery:**")
+                        st.markdown("**Detail Histori Redelivery:**")
                         for d in details:
-                            st.caption(f"• Redel No: `{d['no_shipment_redel']}` | Jenis: {d['jenis_redel']} | Final: {'✅ Ya' if d['is_final_delivery'] else '❌ Tidak'}")
+                            st.caption(f"• Redel No: `{d['no_shipment_redel']}` | Jenis: {d['jenis_redel']} | Final: {'Ya' if d['is_final_delivery'] else 'Tidak'}")
                     else:
                         st.caption("Belum ada riwayat Redelivery.")
         else:
             st.info("Tidak ada data SKR ditemukan.")
 
     with tab2:
-        search_redel = st.text_input("🔍 CARI REDEL", placeholder="Input No Redel Baru / Nama Driver / Nopol...")
         data_redel = supabase.table("redelivery").select("*, detail_redel(*)").execute().data
-        
         if data_redel:
             for redel in data_redel:
                 details = redel.get('detail_redel', [])
-                with st.expander(f"▼ {redel['no_shipment_redel']} | Delman: {redel['nama_delman']} ({redel['nopol_kendaraan']}) | Tgl: {redel['tanggal_pengiriman']}"):
-                    st.markdown("**📦 Daftar SKR Yang Diangkut:**")
+                with st.expander(f"{redel['no_shipment_redel']} | Delman: {redel['nama_delman']} ({redel['nopol_kendaraan']}) | Tgl: {redel['tanggal_pengiriman']}"):
+                    st.markdown("**Daftar SKR Yang Diangkut:**")
                     for d in details:
-                        st.write(f"- **No. SKR:** `{d['no_shipment']}` | **Jenis:** {d['jenis_redel']} | **Flag Final:** {'✅ Selesai' if d['is_final_delivery'] else '❌ Belum Habis'}")
+                        st.write(f"- **No. SKR:** `{d['no_shipment']}` | **Jenis:** {d['jenis_redel']} | **Flag Final:** {'Selesai' if d['is_final_delivery'] else 'Belum Habis'}")
         else:
             st.info("Belum ada data Redelivery.")
 
 # ==========================================
-# 8. HALAMAN 5: DATA PALET (FETCH REALTIME)
+# 8. HALAMAN 5: DATA PALET (REALTIME)
 # ==========================================
 elif st.session_state['active_nav'] == "Data Palet":
-    st.title("📦 Master Data Palet")
+    st.subheader("Master Data Palet")
     if st.button("➕ BUAT PALET BARU", type="primary"):
         modal_tambah_palet()
         
@@ -436,5 +507,5 @@ elif st.session_state['active_nav'] == "Data Palet":
 # 9. HALAMAN 6: LAPORAN REKAP
 # ==========================================
 elif st.session_state['active_nav'] == "Laporan Rekap":
-    st.title("📄 Laporan Rekapitulasi Gudang")
-    st.button("📥 Export CSV Laporan Hari Ini", type="primary")
+    st.subheader("Laporan Rekapitulasi Gudang")
+    st.button("Export CSV Laporan Hari Ini", type="primary")
