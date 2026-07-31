@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redelivery Management System - WINGS</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome CDN (Icon Vector Asli) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'dark-azure': '#0E4A6E',
+                        'azure-hover': '#093550',
+                        'bg-gray': '#F2F5F8',
+                    },
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-bg-gray font-sans h-screen overflow-hidden flex">
+
+    <!-- SIDEBAR NAVBAR (Sama Persis Canva) -->
+    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col justify-between p-5 h-full">
+        <div>
+            <!-- Logo Wings -->
+            <div class="flex justify-center mb-6">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/4/47/Wings_Logo.svg" alt="Wings Logo" class="w-28">
+            </div>
+
+            <!-- Title System -->
+            <h1 class="text-dark-azure font-bold text-lg text-center leading-tight mb-8">
+                Redelivery Management System
+            </h1>
+
+            <!-- Navigasi Menu -->
+            <nav class="space-y-6">
+                <div>
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Main Menu</p>
+                    <a href="index.html" class="flex items-center gap-3 px-4 py-3 bg-dark-azure text-white rounded-xl font-medium text-sm shadow-md transition">
+                        <i class="fa-solid fa-house w-5"></i> Dashboard
+                    </a>
+                </div>
+
+                <div>
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Formulir</p>
+                    <div class="space-y-1">
+                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-100 hover:text-dark-azure rounded-xl font-medium text-sm transition">
+                            <i class="fa-solid fa-boxes-packing w-5"></i> Penerimaan SKR
+                        </a>
+                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-100 hover:text-dark-azure rounded-xl font-medium text-sm transition">
+                            <i class="fa-solid fa-truck-ramp-box w-5"></i> Redelivery
+                        </a>
+                    </div>
+                </div>
+
+                <div>
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Data</p>
+                    <div class="space-y-1">
+                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-100 hover:text-dark-azure rounded-xl font-medium text-sm transition">
+                            <i class="fa-solid fa-database w-5"></i> Data SKR Redel
+                        </a>
+                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-100 hover:text-dark-azure rounded-xl font-medium text-sm transition">
+                            <i class="fa-solid fa-pallet w-5"></i> Data Palet
+                        </a>
+                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-100 hover:text-dark-azure rounded-xl font-medium text-sm transition">
+                            <i class="fa-solid fa-chart-column w-5"></i> Laporan Rekap
+                        </a>
+                    </div>
+                </div>
+            </nav>
+        </div>
+
+        <!-- Logout Button -->
+        <button class="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-red-50 hover:text-red-600 rounded-xl font-medium text-sm transition w-full">
+            <i class="fa-solid fa-right-from-bracket w-5"></i> Logout
+        </button>
+    </aside>
+
+    <!-- CONTENT AREA UTAMA -->
+    <main class="flex-1 p-8 h-full flex flex-col justify-between overflow-hidden">
+        
+        <!-- Header User Info -->
+        <div class="flex justify-between items-center">
+            <div>
+                <h2 class="text-2xl font-bold text-dark-azure">Redelivery Management System</h2>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="text-right">
+                    <p class="font-bold text-gray-800 text-sm leading-none">Suliadi</p>
+                    <p class="text-xs text-gray-500 font-medium">Supervisor</p>
+                </div>
+                <i class="fa-solid fa-circle-user text-3xl text-dark-azure"></i>
+            </div>
+        </div>
+
+        <!-- 3 KARTU STATUS (Metrics Presisi Canva) -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 grid grid-cols-3 gap-6 my-4">
+            <!-- Metric 1 -->
+            <div class="flex items-center gap-4 pl-2 border-l-4 border-red-600">
+                <div class="flex-1">
+                    <p class="text-xs font-semibold text-gray-500 mb-1">Menunggu Shipment Redelivery</p>
+                    <h3 id="cnt-menunggu" class="text-4xl font-extrabold text-dark-azure">28 <span class="text-xs font-semibold text-gray-400">SKR</span></h3>
+                </div>
+            </div>
+            <!-- Metric 2 -->
+            <div class="flex items-center gap-4 pl-2 border-l-4 border-amber-400 border-l border-gray-100 pl-6">
+                <div class="flex-1">
+                    <p class="text-xs font-semibold text-gray-500 mb-1">Redelivery Parsial</p>
+                    <h3 id="cnt-parsial" class="text-4xl font-extrabold text-dark-azure">10 <span class="text-xs font-semibold text-gray-400">SKR</span></h3>
+                </div>
+            </div>
+            <!-- Metric 3 -->
+            <div class="flex items-center gap-4 pl-2 border-l-4 border-emerald-500 border-l border-gray-100 pl-6">
+                <div class="flex-1">
+                    <p class="text-xs font-semibold text-gray-500 mb-1">Selesai Redelivery</p>
+                    <h3 id="cnt-selesai" class="text-4xl font-extrabold text-dark-azure">99 <span class="text-xs font-semibold text-gray-400">SKR</span></h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEARCH BAR SHIPMENT -->
+        <div class="bg-white p-3 rounded-2xl shadow-sm border border-gray-100 flex gap-3">
+            <div class="relative flex-1">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-dark-azure text-lg"></i>
+                <input type="text" id="input-shipment" placeholder="Masukkan Nomor Shipment" class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-dark-azure text-sm text-gray-700">
+            </div>
+            <button onclick="cariShipment()" class="bg-dark-azure hover:bg-azure-hover text-white px-8 py-3 rounded-xl font-semibold text-sm transition">
+                Cari
+            </button>
+        </div>
+
+        <!-- RESULT CONTAINER (JIKA SHIPMENT DITEMUKAN) -->
+        <div id="search-result" class="hidden bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm text-emerald-800">
+            <!-- Hasil pencarian JS -->
+        </div>
+
+        <!-- 2 TOMBOL UTAMA (DARK AZURE) -->
+        <div class="grid grid-cols-2 gap-6">
+            <button class="bg-dark-azure hover:bg-azure-hover text-white rounded-2xl p-8 flex items-center justify-center gap-4 shadow-lg transition group">
+                <i class="fa-solid fa-boxes-packing text-3xl group-hover:scale-110 transition"></i>
+                <span class="text-xl font-bold">Penerimaan SKR</span>
+            </button>
+            <button class="bg-dark-azure hover:bg-azure-hover text-white rounded-2xl p-8 flex items-center justify-center gap-4 shadow-lg transition group">
+                <i class="fa-solid fa-truck-ramp-box text-3xl group-hover:scale-110 transition"></i>
+                <span class="text-xl font-bold">Redelivery</span>
+            </button>
+        </div>
+
+        <!-- DOWNLOAD LAPORAN BUTTON (HIJAU CANVA) -->
+        <button class="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-4 font-bold text-base flex items-center justify-center gap-3 shadow-md transition">
+            <i class="fa-solid fa-download text-lg"></i> Download Laporan Rekapitulasi Hari Ini
+        </button>
+
+    </main>
+
+    <!-- SCRIPT REALTIME SUPABASE DATA -->
+    <script>
+        const SUPABASE_URL = "https://rmlxzhhsvcgadzcjpyxm.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtbHh6aGhzdmNnYWR6Y2pweXhtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzOTE2NzAsImV4cCI6MjEwMDk2NzY3MH0.Ft0tKwqmwyNdAChPombLj3Og7QIE_1vix24V3JUmNw8";
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Fetch Count Metrics Realtime dari Supabase
+        async function fetchMetrics() {
+            const { data, error } = await _supabase.from('skr_redel').select('status_skr');
+            if (data) {
+                const menunggu = data.filter(d => d.status_skr === 'Menunggu shipment baru').length;
+                const parsial = data.filter(d => d.status_skr === 'Parsial').length;
+                const selesai = data.filter(d => d.status_skr === 'Selesai').length;
+
+                document.getElementById('cnt-menunggu').innerHTML = `${menunggu} <span class="text-xs font-semibold text-gray-400">SKR</span>`;
+                document.getElementById('cnt-parsial').innerHTML = `${parsial} <span class="text-xs font-semibold text-gray-400">SKR</span>`;
+                document.getElementById('cnt-selesai').innerHTML = `${selesai} <span class="text-xs font-semibold text-gray-400">SKR</span>`;
+            }
+        }
+
+        // Cari Shipment
+        async function cariShipment() {
+            const query = document.getElementById('input-shipment').value.trim();
+            const resDiv = document.getElementById('search-result');
+            
+            if(!query) return;
+
+            const { data, error } = await _supabase
+                .from('skr_redel')
+                .select('*, penempatan(nomor_palet)')
+                .eq('no_shipment', query);
+
+            resDiv.classList.remove('hidden');
+            if(data && data.length > 0) {
+                const item = data[0];
+                const palets = item.penempatan ? item.penempatan.map(p => p.nomor_palet).join(', ') : '-';
+                resDiv.className = "bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-900";
+                resDiv.innerHTML = `<b>✅ Shipment Ditemukan:</b> ${item.no_shipment} | Delman: <b>${item.nama_delman}</b> | Nopol: <b>${item.nopol_kendaraan}</b> | Status: <b>${item.status_skr}</b> | Palet: <b>${palets}</b>`;
+            } else {
+                resDiv.className = "bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-800";
+                resDiv.innerHTML = `❌ Nomor Shipment <b>"${query}"</b> tidak ditemukan di database.`;
+            }
+        }
+
+        fetchMetrics();
+    </script>
+</body>
+</html>
