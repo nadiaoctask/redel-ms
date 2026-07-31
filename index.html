@@ -169,49 +169,51 @@
                 <div class="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-gray-100">
                     <h3 class="text-base md:text-lg font-bold text-dark-azure border-b pb-3 mb-4">Data Shipment</h3>
                     
-                    <form id="form-penerimaan" onsubmit="simpanPenerimaan(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                        <div class="space-y-4">
+                    <form id="form-penerimaan" onsubmit="simpanPenerimaan(event)">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 md:gap-y-5">
                             <div>
                                 <label class="block text-[11px] md:text-xs font-semibold text-gray-600 mb-1">No. Shipment *</label>
-                                <input type="text" id="in-no-shipment" required class="w-full px-4 py-3 md:py-2.5 rounded-xl border text-sm">
+                                <input type="text" id="in-no-shipment" required class="w-full px-4 py-2.5 rounded-xl border text-sm focus:border-dark-azure focus:outline-none">
                             </div>
-                            <div>
-                                <label class="block text-[11px] md:text-xs font-semibold text-gray-600 mb-1">Nama Delman</label>
-                                <input type="text" id="in-nama-delman" class="w-full px-4 py-3 md:py-2.5 rounded-xl border text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-[11px] md:text-xs font-semibold text-gray-600 mb-1">Nopol Kendaraan</label>
-                                <input type="text" id="in-nopol" class="w-full px-4 py-3 md:py-2.5 rounded-xl border text-sm">
-                            </div>
-                        </div>
-
-                        <div class="space-y-4">
                             <div>
                                 <label class="block text-[11px] md:text-xs font-semibold text-gray-600 mb-1">Jenis GR</label>
-                                <div class="flex gap-4 md:gap-6 mt-2">
-                                    <label class="flex items-center gap-2 text-sm text-gray-700"><input type="radio" name="jenis_gr" value="Sistem" checked> Sistem</label>
-                                    <label class="flex items-center gap-2 text-sm text-gray-700"><input type="radio" name="jenis_gr" value="Turun gudang"> Turun Gudang</label>
+                                <div class="flex gap-4 md:gap-6 h-[42px] items-center">
+                                    <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer"><input type="radio" name="jenis_gr" value="Sistem" checked> Sistem</label>
+                                    <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer"><input type="radio" name="jenis_gr" value="Turun gudang"> Turun Gudang</label>
                                 </div>
+                            </div>
+
+                            <!-- BARIS 2 -->
+                            <div>
+                                <label class="block text-[11px] md:text-xs font-semibold text-gray-600 mb-1">Nama DelMan</label>
+                                <input type="text" id="in-nama-delman" class="w-full px-4 py-2.5 rounded-xl border text-sm focus:border-dark-azure focus:outline-none">
                             </div>
                             <div>
                                 <label class="block text-[11px] md:text-xs font-semibold text-gray-600 mb-1">Tanggal Penerimaan</label>
-                                <input type="date" id="in-tgl" class="w-full px-4 py-3 md:py-2.5 rounded-xl border bg-white text-sm text-gray-700 focus:border-dark-azure focus:outline-none">
+                                <input type="date" id="in-tgl" class="w-full px-4 py-2.5 rounded-xl border bg-white text-sm text-gray-700 focus:border-dark-azure focus:outline-none">
+                            </div>
+
+                            <!-- BARIS 3 -->
+                            <div>
+                                <label class="block text-[11px] md:text-xs font-semibold text-gray-600 mb-1">Nomor Kendaraan</label>
+                                <input type="text" id="in-nopol" class="w-full px-4 py-2.5 rounded-xl border text-sm focus:border-dark-azure focus:outline-none">
                             </div>
                             <div>
                                 <label class="block text-[11px] md:text-xs font-semibold text-gray-600 mb-1">Pilih Palet</label>
-                                <div class="flex flex-col md:flex-row gap-2">
-                                    <select id="select-palet" class="flex-1 px-4 py-3 md:py-2.5 rounded-xl border text-sm bg-white"></select>
-                                    <button type="button" onclick="openModalPalet()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-3 md:py-2.5 rounded-xl font-medium text-xs">
+                                <div class="flex gap-2 h-[42px]">
+                                    <select id="select-palet" class="flex-1 px-4 py-2.5 rounded-xl border text-sm bg-white focus:border-dark-azure focus:outline-none"></select>
+                                    <button type="button" onclick="openModalPalet()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 rounded-xl font-medium text-xs transition">
                                         + Palet Baru
                                     </button>
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="col-span-full pt-6 pb-4 border-t border-gray-200 mt-2">
-                            <button type="submit" class="w-full bg-dark-azure hover:bg-azure-hover text-white py-3.5 md:py-3 rounded-xl font-bold text-sm shadow-md transition">
-                                <i class="fa-solid fa-floppy-disk mr-2"></i> SIMPAN PENERIMAAN
-                            </button>
+                            
+                            <!-- TOMBOL SUBMIT -->
+                            <div class="col-span-full pt-6 pb-4 border-t border-gray-200 mt-2">
+                                <button type="submit" class="w-full bg-dark-azure hover:bg-azure-hover text-white py-3.5 md:py-3 rounded-xl font-bold text-sm shadow-md transition">
+                                    <i class="fa-solid fa-floppy-disk mr-2"></i> SIMPAN PENERIMAAN
+                                </button>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -225,30 +227,29 @@
                  <form id="form-redelivery" onsubmit="simpanRedelivery(event)" class="space-y-4 md:space-y-6">
                     <div class="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-gray-100 space-y-4">
                         <h3 class="text-base md:text-lg font-bold text-dark-azure border-b pb-3">Data Redelivery</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                            <div class="space-y-4">
-                                <div><label class="block text-xs font-semibold text-gray-600 mb-1">No. Shipment Baru *</label><input type="text" id="redel-no-shipment" required class="w-full px-4 py-3 md:py-2.5 rounded-xl border text-sm"></div>
-                                <div><label class="block text-xs font-semibold text-gray-600 mb-1">Nama Delman</label><input type="text" id="redel-nama-delman" class="w-full px-4 py-3 md:py-2.5 rounded-xl border text-sm"></div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 md:gap-y-5">
+                            <!-- BARIS 1 -->
+                            <div>
+                                <label class="block text-[11px] md:text-xs font-semibold text-gray-600 mb-1">No. Shipment</label>
+                                <input type="text" id="redel-no-shipment" required class="w-full px-4 py-2.5 rounded-xl border text-sm focus:border-dark-azure focus:outline-none">
                             </div>
-                            <div class="space-y-4">
-                                <div><label class="block text-xs font-semibold text-gray-600 mb-1">Nomor Kendaraan</label><input type="text" id="redel-nopol" class="w-full px-4 py-3 md:py-2.5 rounded-xl border text-sm"></div>
-                                <div><label class="block text--[11px] md:xs font-semibold text-gray-600 mb-1">Tanggal Pengiriman</label><input type="date" id="redel-tgl" class="w-full px-4 py-3 md:py-2.5 rounded-xl border bg-gray-50 text-sm"></div>
+                            <div>
+                                <!-- Label disesuaikan dgn screenshot (Nomor Kendaraan) -->
+                                <label class="block text-[11px] md:text-xs font-semibold text-gray-600 mb-1">Nomor Kendaraan</label>
+                                <input type="text" id="redel-nopol" class="w-full px-4 py-2.5 rounded-xl border text-sm focus:border-dark-azure focus:outline-none">
+                            </div>
+
+                            <!-- BARIS 2 -->
+                            <div>
+                                <label class="block text-[11px] md:text-xs font-semibold text-gray-600 mb-1">Nama DelMan</label>
+                                <input type="text" id="redel-nama-delman" class="w-full px-4 py-2.5 rounded-xl border text-sm focus:border-dark-azure focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] md:text-xs font-semibold text-gray-600 mb-1">Tanggal Pengiriman</label>
+                                <input type="date" id="redel-tgl" class="w-full px-4 py-2.5 rounded-xl border bg-white text-sm focus:border-dark-azure focus:outline-none text-gray-700">
                             </div>
                         </div>
-                    </div>
-
-                    <div class="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-gray-100 space-y-4">
-                        <h3 class="text-base md:text-lg font-bold text-dark-azure border-b pb-3">Data SKR Diangkut</h3>
-                        <div id="redel-items-container" class="space-y-3"></div>
-                        <button type="button" onclick="addRedelRow()" class="w-full md:w-auto bg-gray-100 hover:bg-gray-200 text-dark-azure font-semibold text-xs px-4 py-3 md:py-2.5 rounded-xl transition">
-                            <i class="fa-solid fa-plus mr-1"></i> Tambah SKR Lain
-                        </button>
-                    </div>
-
-                    <div class="col-span-full pt-6 pb-4 border-t border-gray-200 mt-2">
-                            <button type="submit" class="w-full bg-dark-azure hover:bg-azure-hover text-white py-3.5 md:py-3 rounded-xl font-bold text-sm shadow-md transition">
-                                <i class="fa-solid fa-floppy-disk mr-2"></i> SIMPAN REDELIVERY
-                            </button>
                     </div>
                 </form>
             </section>
@@ -282,12 +283,15 @@
                     </div>
 
                     <!-- OVERFLOW X AUTO UNTUK HP -->
-                    <div class="bg-white rounded-2xl border border-gray-100 overflow-x-auto shadow-sm">
-                        <table class="w-full text-left border-collapse text-xs md:text-sm min-w-[800px]">
+                    <div class="bg-white rounded-2xl border border-gray-100 overflow-x-auto shadow-sm mt-3">
+                        <table class="w-full text-left border-collapse text-xs md:text-sm min-w-[1000px]">
                             <thead class="bg-gray-50 text-gray-600 font-semibold border-b">
                                 <tr>
                                     <th class="p-4 w-12"></th>
                                     <th class="p-4">No. Shipment</th>
+                                    <th class="p-4">Tanggal Masuk</th>
+                                    <th class="p-4">Nama DelMan</th>
+                                    <th class="p-4">Nomor Kendaraan</th>
                                     <th class="p-4">Jenis GR</th>
                                     <th class="p-4">ID Palet</th>
                                     <th class="p-4">Status SKR</th>
@@ -298,6 +302,7 @@
                         </table>
                     </div>
                 </div>
+                </div>
 
                 <!-- Tab Outbound -->
                 <div id="tab-out" class="tab-content hidden space-y-4">
@@ -305,13 +310,14 @@
                         <input type="text" id="filter-search-redel" onkeyup="renderTableOutbound()" placeholder="Cari Redel..." class="w-full px-4 py-2.5 rounded-xl border text-sm">
                     </div>
 
-                    <div class="bg-white rounded-2xl border border-gray-100 overflow-x-auto shadow-sm">
-                        <table class="w-full text-left border-collapse text-xs md:text-sm min-w-[600px]">
+                    <div class="bg-white rounded-2xl border border-gray-100 overflow-x-auto shadow-sm mt-3">
+                        <table class="w-full text-left border-collapse text-xs md:text-sm min-w-[800px]">
                             <thead class="bg-gray-50 text-gray-600 font-semibold border-b">
                                 <tr>
                                     <th class="p-4 w-12"></th>
                                     <th class="p-4">No. Shipment</th>
                                     <th class="p-4">Nama DelMan</th>
+                                    <th class="p-4">Nomor Kendaraan</th>
                                     <th class="p-4">Tanggal Kirim</th>
                                     <th class="p-4 text-center">Aksi</th>
                                 </tr>
@@ -676,19 +682,28 @@
             let { data } = await _supabase.from('skr_redel').select('*, penempatan(nomor_palet), detail_redel(*)');
             
             if(data) {
-                if(searchVal) data = data.filter(s => s.no_shipment.toLowerCase().includes(searchVal) || (s.nama_delman && s.nama_delman.toLowerCase().includes(searchVal)));
+                if(searchVal) {
+                    data = data.filter(s => 
+                        s.no_shipment.toLowerCase().includes(searchVal) || 
+                        (s.nama_delman && s.nama_delman.toLowerCase().includes(searchVal)) ||
+                        (s.tanggal_penerimaan && s.tanggal_penerimaan.includes(searchVal))
+                    );
+                }
                 if(grVal) data = data.filter(s => s.jenis_gr === grVal);
                 if(statusVal) data = data.filter(s => s.status_skr === statusVal);
 
                 tbody.innerHTML = data.map(item => {
-                    const palets = item.penempatan ? item.penempatan.map(p => p.nomor_palet).join(', ') : '-';
+                    const palets = item.penempatan && item.penempatan.length > 0 ? item.penempatan.map(p => p.nomor_palet).join(', ') : '-';
                     const badgeColor = item.status_skr === 'Selesai' ? 'bg-emerald-100 text-emerald-800' : item.status_skr === 'Parsial' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800';
                     const isDeletable = item.status_skr === 'Menunggu shipment baru';
 
                     return `
-                        <tr class="whitespace-nowrap">
+                        <tr class="whitespace-nowrap hover:bg-gray-50 transition">
                             <td class="p-4"><button onclick="this.parentElement.parentElement.nextElementSibling.classList.toggle('hidden')" class="text-dark-azure hover:text-azure-hover font-bold"><i class="fa-solid fa-chevron-down"></i></button></td>
                             <td class="p-4 font-bold text-dark-azure">${item.no_shipment}</td>
+                            <td class="p-4 font-medium text-gray-700">${item.tanggal_penerimaan}</td>
+                            <td class="p-4">${item.nama_delman || '-'}</td>
+                            <td class="p-4">${item.nopol_kendaraan || '-'}</td>
                             <td class="p-4">${item.jenis_gr}</td>
                             <td class="p-4 font-medium">${palets}</td>
                             <td class="p-4"><span class="px-3 py-1 rounded-full text-[10px] md:text-xs font-bold ${badgeColor}">${item.status_skr}</span></td>
@@ -697,7 +712,7 @@
                             </td>
                         </tr>
                         <tr class="hidden bg-gray-50 border-b">
-                            <td colspan="6" class="p-4 text-xs">
+                            <td colspan="9" class="p-4 text-xs"> <!-- colspan disesuaikan jadi 9 -->
                                 <div class="font-bold text-dark-azure mb-1">🚚 Detail Histori Redelivery:</div>
                                 <div class="space-y-1 pl-4">
                                     ${item.detail_redel && item.detail_redel.length > 0 ? item.detail_redel.map(d => `• Redel No: <b>${d.no_shipment_redel}</b> | Jenis: ${d.jenis_redel} | Status Final: ${d.is_final_delivery ? '✅ Selesai' : '❌ Parsial'}`).join('<br>') : '<span class="text-gray-400">Belum ada histori pengiriman.</span>'}
@@ -706,6 +721,43 @@
                         </tr>
                     `;
                 }).join('');
+            }
+        }
+
+        async function renderTableOutbound() {
+            const tbody = document.getElementById('tbody-outbound');
+            const searchVal = document.getElementById('filter-search-redel').value.toLowerCase();
+            let { data } = await _supabase.from('redelivery').select('*, detail_redel(*)');
+            
+            if(data) {
+                if(searchVal) {
+                    data = data.filter(r => 
+                        r.no_shipment_redel.toLowerCase().includes(searchVal) || 
+                        (r.nama_delman && r.nama_delman.toLowerCase().includes(searchVal)) ||
+                        (r.tanggal_pengiriman && r.tanggal_pengiriman.includes(searchVal))
+                    );
+                }
+
+                tbody.innerHTML = data.map(item => `
+                    <tr class="whitespace-nowrap hover:bg-gray-50 transition">
+                        <td class="p-4"><button onclick="this.parentElement.parentElement.nextElementSibling.classList.toggle('hidden')" class="text-dark-azure hover:text-azure-hover font-bold"><i class="fa-solid fa-chevron-down"></i></button></td>
+                        <td class="p-4 font-bold text-dark-azure">${item.no_shipment_redel}</td>
+                        <td class="p-4">${item.nama_delman || '-'}</td>
+                        <td class="p-4">${item.nopol_kendaraan || '-'}</td>
+                        <td class="p-4 font-medium text-gray-700">${item.tanggal_pengiriman}</td>
+                        <td class="p-4 text-center">
+                            <button onclick="hapusRedel('${item.no_shipment_redel}')" class="text-red-500 hover:text-red-700 font-bold" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                    <tr class="hidden bg-gray-50 border-b">
+                        <td colspan="6" class="p-4 text-xs"> <!-- colspan disesuaikan jadi 6 -->
+                            <div class="font-bold text-dark-azure mb-1">📦 SKR Yang Diangkut Dalam Surat Jalan Ini:</div>
+                            <div class="space-y-1 pl-4">
+                                ${item.detail_redel && item.detail_redel.length > 0 ? item.detail_redel.map(d => `• No SKR: <b>${d.no_shipment}</b> | Jenis: ${d.jenis_redel} | Status Final: ${d.is_final_delivery ? '✅ Selesai (Cleared)' : '❌ Parsial'}`).join('<br>') : '<span class="text-gray-400">Belum ada SKR yang terdata.</span>'}
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
             }
         }
 
