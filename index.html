@@ -33,71 +33,67 @@
 </head>
 <body class="bg-bg-gray font-sans h-screen overflow-hidden flex">
 
-    <!-- SIDEBAR NAVBAR (Sama Persis Canva) -->
-    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col justify-between p-5 h-full">
+    <!-- SIDEBAR NAVBAR -->
+    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col justify-between p-5 h-full z-10">
         <div>
             <!-- Logo Wings -->
-            <div class="flex justify-center mb-6">
+            <div class="flex justify-center mb-4">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/4/47/Wings_Logo.svg" alt="Wings Logo" class="w-28">
             </div>
 
-            <!-- Title System -->
-            <h1 class="text-dark-azure font-bold text-lg text-center leading-tight mb-8">
-                Redelivery Management System
+            <h1 class="text-dark-azure font-bold text-base text-center leading-tight mb-6">
+                Redelivery System
             </h1>
 
             <!-- Navigasi Menu -->
-            <nav class="space-y-6">
+            <nav class="space-y-4">
                 <div>
-                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Main Menu</p>
-                    <a href="index.html" class="flex items-center gap-3 px-4 py-3 bg-dark-azure text-white rounded-xl font-medium text-sm shadow-md transition">
+                    <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Main Menu</p>
+                    <button onclick="switchPage('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 bg-dark-azure text-white rounded-xl font-medium text-sm transition">
                         <i class="fa-solid fa-house w-5"></i> Dashboard
-                    </a>
+                    </button>
                 </div>
 
                 <div>
-                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Formulir</p>
+                    <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Formulir</p>
                     <div class="space-y-1">
-                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-100 hover:text-dark-azure rounded-xl font-medium text-sm transition">
+                        <button onclick="switchPage('penerimaan')" id="nav-penerimaan" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-100 hover:text-dark-azure rounded-xl font-medium text-sm transition">
                             <i class="fa-solid fa-boxes-packing w-5"></i> Penerimaan SKR
-                        </a>
-                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-100 hover:text-dark-azure rounded-xl font-medium text-sm transition">
+                        </button>
+                        <button onclick="switchPage('redelivery')" id="nav-redelivery" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-100 hover:text-dark-azure rounded-xl font-medium text-sm transition">
                             <i class="fa-solid fa-truck-ramp-box w-5"></i> Redelivery
-                        </a>
+                        </button>
                     </div>
                 </div>
 
                 <div>
-                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Data</p>
+                    <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Data</p>
                     <div class="space-y-1">
-                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-100 hover:text-dark-azure rounded-xl font-medium text-sm transition">
+                        <button onclick="switchPage('monitoring')" id="nav-monitoring" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-100 hover:text-dark-azure rounded-xl font-medium text-sm transition">
                             <i class="fa-solid fa-database w-5"></i> Data SKR Redel
-                        </a>
-                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-100 hover:text-dark-azure rounded-xl font-medium text-sm transition">
+                        </button>
+                        <button onclick="switchPage('palet')" id="nav-palet" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-100 hover:text-dark-azure rounded-xl font-medium text-sm transition">
                             <i class="fa-solid fa-pallet w-5"></i> Data Palet
-                        </a>
-                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-100 hover:text-dark-azure rounded-xl font-medium text-sm transition">
+                        </button>
+                        <button onclick="switchPage('laporan')" id="nav-laporan" class="nav-btn w-full flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-100 hover:text-dark-azure rounded-xl font-medium text-sm transition">
                             <i class="fa-solid fa-chart-column w-5"></i> Laporan Rekap
-                        </a>
+                        </button>
                     </div>
                 </div>
             </nav>
         </div>
 
-        <!-- Logout Button -->
-        <button class="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-red-50 hover:text-red-600 rounded-xl font-medium text-sm transition w-full">
+        <button onclick="alert('Logout Berhasil')" class="flex items-center gap-3 px-4 py-2 text-gray-600 hover:bg-red-50 hover:text-red-600 rounded-xl font-medium text-sm transition w-full">
             <i class="fa-solid fa-right-from-bracket w-5"></i> Logout
         </button>
     </aside>
 
-    <!-- CONTENT AREA UTAMA -->
-    <main class="flex-1 p-8 h-full flex flex-col justify-between overflow-hidden">
+    <!-- MAIN CONTENT CONTAINER -->
+    <div class="flex-1 flex flex-col h-full overflow-y-auto">
         
-        <!-- Header User Info -->
-        <div class="flex justify-between items-center">
-            <div>
-                <h2 class="text-2xl font-bold text-dark-azure">Redelivery Management System</h2>
-            </div>
+        <!-- TOPBAR HEADER -->
+        <header class="bg-white px-8 py-4 border-b border-gray-200 flex justify-between items-center sticky top-0 z-0">
+            <h2 id="page-title" class="text-xl font-bold text-dark-azure">Redelivery Management System</h2>
             <div class="flex items-center gap-3">
                 <div class="text-right">
                     <p class="font-bold text-gray-800 text-sm leading-none">Suliadi</p>
@@ -105,112 +101,597 @@
                 </div>
                 <i class="fa-solid fa-circle-user text-3xl text-dark-azure"></i>
             </div>
-        </div>
+        </header>
 
-        <!-- 3 KARTU STATUS (Metrics Presisi Canva) -->
-        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 grid grid-cols-3 gap-6 my-4">
-            <!-- Metric 1 -->
-            <div class="flex items-center gap-4 pl-2 border-l-4 border-red-600">
-                <div class="flex-1">
-                    <p class="text-xs font-semibold text-gray-500 mb-1">Menunggu Shipment Redelivery</p>
-                    <h3 id="cnt-menunggu" class="text-4xl font-extrabold text-dark-azure">28 <span class="text-xs font-semibold text-gray-400">SKR</span></h3>
+        <!-- AREA HALAMAN DINAMIS -->
+        <main class="p-8 flex-1">
+
+            <!-- 1. HALAMAN DASHBOARD -->
+            <section id="page-dashboard" class="page-content space-y-6">
+                <!-- Status Cards -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 grid grid-cols-3 gap-6">
+                    <div class="flex items-center gap-4 pl-2 border-l-4 border-red-600">
+                        <div class="flex-1">
+                            <p class="text-xs font-semibold text-gray-500 mb-1">Menunggu Shipment Redelivery</p>
+                            <h3 id="cnt-menunggu" class="text-3xl font-extrabold text-dark-azure">0 <span class="text-xs font-semibold text-gray-400">SKR</span></h3>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4 pl-2 border-l-4 border-amber-400 border-l border-gray-100 pl-6">
+                        <div class="flex-1">
+                            <p class="text-xs font-semibold text-gray-500 mb-1">Redelivery Parsial</p>
+                            <h3 id="cnt-parsial" class="text-3xl font-extrabold text-dark-azure">0 <span class="text-xs font-semibold text-gray-400">SKR</span></h3>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4 pl-2 border-l-4 border-emerald-500 border-l border-gray-100 pl-6">
+                        <div class="flex-1">
+                            <p class="text-xs font-semibold text-gray-500 mb-1">Selesai Redelivery</p>
+                            <h3 id="cnt-selesai" class="text-3xl font-extrabold text-dark-azure">0 <span class="text-xs font-semibold text-gray-400">SKR</span></h3>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <!-- Metric 2 -->
-            <div class="flex items-center gap-4 pl-2 border-l-4 border-amber-400 border-l border-gray-100 pl-6">
-                <div class="flex-1">
-                    <p class="text-xs font-semibold text-gray-500 mb-1">Redelivery Parsial</p>
-                    <h3 id="cnt-parsial" class="text-4xl font-extrabold text-dark-azure">10 <span class="text-xs font-semibold text-gray-400">SKR</span></h3>
+
+                <!-- Search Bar -->
+                <div class="bg-white p-3 rounded-2xl shadow-sm border border-gray-100 flex gap-3">
+                    <div class="relative flex-1">
+                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-dark-azure text-base"></i>
+                        <input type="text" id="input-shipment" placeholder="Masukkan Nomor Shipment..." class="w-full pl-11 pr-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-dark-azure text-sm">
+                    </div>
+                    <button onclick="cariShipment()" class="bg-dark-azure hover:bg-azure-hover text-white px-8 py-2.5 rounded-xl font-semibold text-sm transition">Cari</button>
                 </div>
-            </div>
-            <!-- Metric 3 -->
-            <div class="flex items-center gap-4 pl-2 border-l-4 border-emerald-500 border-l border-gray-100 pl-6">
-                <div class="flex-1">
-                    <p class="text-xs font-semibold text-gray-500 mb-1">Selesai Redelivery</p>
-                    <h3 id="cnt-selesai" class="text-4xl font-extrabold text-dark-azure">99 <span class="text-xs font-semibold text-gray-400">SKR</span></h3>
+
+                <div id="search-result" class="hidden rounded-xl p-4 text-sm"></div>
+
+                <!-- Action Buttons -->
+                <div class="grid grid-cols-2 gap-6">
+                    <button onclick="switchPage('penerimaan')" class="bg-dark-azure hover:bg-azure-hover text-white rounded-2xl p-6 flex items-center justify-center gap-4 shadow-md transition group">
+                        <i class="fa-solid fa-boxes-packing text-2xl group-hover:scale-110 transition"></i>
+                        <span class="text-lg font-bold">Penerimaan SKR</span>
+                    </button>
+                    <button onclick="switchPage('redelivery')" class="bg-dark-azure hover:bg-azure-hover text-white rounded-2xl p-6 flex items-center justify-center gap-4 shadow-md transition group">
+                        <i class="fa-solid fa-truck-ramp-box text-2xl group-hover:scale-110 transition"></i>
+                        <span class="text-lg font-bold">Redelivery</span>
+                    </button>
                 </div>
+
+                <button class="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-3 font-bold text-sm flex items-center justify-center gap-2 shadow-sm transition">
+                    <i class="fa-solid fa-download"></i> Download Laporan Rekapitulasi Hari Ini
+                </button>
+            </section>
+
+            <!-- 2. HALAMAN FORM PENERIMAAN SKR -->
+            <section id="page-penerimaan" class="page-content hidden space-y-6">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-6">
+                    <h3 class="text-lg font-bold text-dark-azure border-b pb-3">Masukkan Data Shipment</h3>
+                    
+                    <form id="form-penerimaan" onsubmit="simpanPenerimaan(event)" class="grid grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">No. Shipment *</label>
+                                <input type="text" id="in-no-shipment" required placeholder="Masukkan Nomor Shipment" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:border-dark-azure focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Nama Delman</label>
+                                <input type="text" id="in-nama-delman" placeholder="Nama Driver / Sopir" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:border-dark-azure focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Nopol Kendaraan</label>
+                                <input type="text" id="in-nopol" placeholder="B 1234 XYZ" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:border-dark-azure focus:outline-none">
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Jenis GR</label>
+                                <div class="flex gap-6 mt-2">
+                                    <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                                        <input type="radio" name="jenis_gr" value="Sistem" checked class="text-dark-azure"> Sistem
+                                    </label>
+                                    <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                                        <input type="radio" name="jenis_gr" value="Turun gudang" class="text-dark-azure"> Turun Gudang
+                                    </label>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Tanggal Penerimaan</label>
+                                <input type="text" id="in-tgl" readonly class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Pilih Palet</label>
+                                <div class="flex gap-2">
+                                    <select id="select-palet" class="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:border-dark-azure focus:outline-none bg-white">
+                                        <!-- Dynamic Palet List -->
+                                    </select>
+                                    <button type="button" onclick="openModalPalet()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl font-medium text-xs whitespace-nowrap transition">
+                                        <i class="fa-solid fa-plus mr-1"></i> Buat Palet Baru
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-span-2 pt-4 border-t">
+                            <button type="submit" class="w-full bg-dark-azure hover:bg-azure-hover text-white py-3 rounded-xl font-bold text-sm transition">
+                                <i class="fa-solid fa-floppy-disk mr-2"></i> SIMPAN PENERIMAAN
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- 3. HALAMAN FORM REDELIVERY -->
+            <section id="page-redelivery" class="page-content hidden space-y-6">
+                <form id="form-redelivery" onsubmit="simpanRedelivery(event)" class="space-y-6">
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-4">
+                        <h3 class="text-lg font-bold text-dark-azure border-b pb-3">Masukkan Data Redelivery</h3>
+                        <div class="grid grid-cols-2 gap-6">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-1">No. Shipment Baru *</label>
+                                    <input type="text" id="redel-no-shipment" required placeholder="Input Nomor Redelivery Baru" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:border-dark-azure focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Nama Delman</label>
+                                    <input type="text" id="redel-nama-delman" placeholder="Nama Driver Redel" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:border-dark-azure focus:outline-none">
+                                </div>
+                            </div>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Nopol Kendaraan</label>
+                                    <input type="text" id="redel-nopol" placeholder="B 9999 RED" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:border-dark-azure focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Tanggal Pengiriman</label>
+                                    <input type="text" id="redel-tgl" readonly class="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-500">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-4">
+                        <h3 class="text-lg font-bold text-dark-azure border-b pb-3">Masukkan Data SKR yang Diangkut</h3>
+                        <div id="redel-items-container" class="space-y-3">
+                            <!-- Rows SKR Dinamis -->
+                        </div>
+                        <button type="button" onclick="addRedelRow()" class="bg-gray-100 hover:bg-gray-200 text-dark-azure font-semibold text-xs px-4 py-2.5 rounded-xl transition">
+                            <i class="fa-solid fa-plus mr-1"></i> Tambah SKR Lain Ke Pengiriman Ini
+                        </button>
+                    </div>
+
+                    <button type="submit" class="w-full bg-dark-azure hover:bg-azure-hover text-white py-3 rounded-xl font-bold text-sm transition">
+                        <i class="fa-solid fa-floppy-disk mr-2"></i> SIMPAN REDELIVERY
+                    </button>
+                </form>
+            </section>
+
+            <!-- 4. HALAMAN MONITORING (DATA SKR REDEL) -->
+            <section id="page-monitoring" class="page-content hidden space-y-6">
+                <!-- Tab Menu -->
+                <div class="flex border-b border-gray-200 gap-4">
+                    <button onclick="switchTab('tab-in')" id="btn-tab-in" class="py-3 px-6 font-bold text-sm border-b-2 border-dark-azure text-dark-azure transition">
+                        📥 TAB 1: PENERIMAAN SKR (IN)
+                    </button>
+                    <button onclick="switchTab('tab-out')" id="btn-tab-out" class="py-3 px-6 font-bold text-sm border-b-2 border-transparent text-gray-400 hover:text-dark-azure transition">
+                        📤 TAB 2: REDELIVERY / KIRIM ULANG (OUT)
+                    </button>
+                </div>
+
+                <!-- Tab 1: INBOUND -->
+                <div id="tab-in" class="tab-content space-y-4">
+                    <div class="bg-white p-4 rounded-2xl border border-gray-100 grid grid-cols-3 gap-4">
+                        <input type="text" id="filter-search-skr" onkeyup="renderTableInbound()" placeholder="🔍 Cari SKR / Delman..." class="px-4 py-2 rounded-xl border text-sm">
+                        <select id="filter-gr" onchange="renderTableInbound()" class="px-4 py-2 rounded-xl border text-sm bg-white">
+                            <option value="">Semua Jenis GR</option>
+                            <option value="Sistem">GR Sistem</option>
+                            <option value="Turun gudang">GR Turun Gudang</option>
+                        </select>
+                        <select id="filter-status" onchange="renderTableInbound()" class="px-4 py-2 rounded-xl border text-sm bg-white">
+                            <option value="">Semua Status</option>
+                            <option value="Menunggu shipment baru">Menunggu shipment baru</option>
+                            <option value="Parsial">Parsial</option>
+                            <option value="Selesai">Selesai</option>
+                        </select>
+                    </div>
+
+                    <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead class="bg-gray-50 text-gray-600 font-semibold border-b">
+                                <tr>
+                                    <th class="p-4 w-12"></th>
+                                    <th class="p-4">No. Shipment</th>
+                                    <th class="p-4">Jenis GR</th>
+                                    <th class="p-4">ID Palet</th>
+                                    <th class="p-4">Tgl Masuk</th>
+                                    <th class="p-4">Status SKR</th>
+                                    <th class="p-4 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-inbound" class="divide-y divide-gray-100">
+                                <!-- Data SKR Inbound -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tab 2: OUTBOUND -->
+                <div id="tab-out" class="tab-content hidden space-y-4">
+                    <div class="bg-white p-4 rounded-2xl border border-gray-100">
+                        <input type="text" id="filter-search-redel" onkeyup="renderTableOutbound()" placeholder="🔍 Cari Redel Baru / Driver / Nopol..." class="w-full px-4 py-2 rounded-xl border text-sm">
+                    </div>
+
+                    <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead class="bg-gray-50 text-gray-600 font-semibold border-b">
+                                <tr>
+                                    <th class="p-4 w-12"></th>
+                                    <th class="p-4">No. Redel Baru</th>
+                                    <th class="p-4">Nama Delman</th>
+                                    <th class="p-4">Nopol Kendaraan</th>
+                                    <th class="p-4">Tgl Kirim</th>
+                                    <th class="p-4 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-outbound" class="divide-y divide-gray-100">
+                                <!-- Data Redelivery Outbound -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. HALAMAN DATA PALET -->
+            <section id="page-palet" class="page-content hidden space-y-6">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-bold text-dark-azure">Master Data Palet</h3>
+                    <button onclick="openModalPalet()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-semibold text-xs transition">
+                        <i class="fa-solid fa-plus mr-1"></i> BUAT PALET BARU
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead class="bg-gray-50 text-gray-600 font-semibold border-b">
+                            <tr>
+                                <th class="p-4">Nomor Palet</th>
+                                <th class="p-4">Jenis Palet</th>
+                                <th class="p-4">Status Palet</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-palet" class="divide-y divide-gray-100">
+                            <!-- Data Palet -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 6. HALAMAN LAPORAN REKAP -->
+            <section id="page-laporan" class="page-content hidden space-y-6">
+                <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 text-center space-y-4">
+                    <i class="fa-solid fa-file-excel text-5xl text-emerald-600"></i>
+                    <h3 class="text-lg font-bold text-dark-azure">Export Laporan Rekapitulasi</h3>
+                    <p class="text-xs text-gray-500 max-w-md mx-auto">Unduh seluruh riwayat penerimaan SKR dan pengiriman Redelivery dalam bentuk format data ringkas.</p>
+                    <button class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-bold text-sm transition">
+                        <i class="fa-solid fa-download mr-2"></i> Download Laporan Rekapitulasi (.CSV)
+                    </button>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- MODAL POP-UP: TAMBAH PALET BARU -->
+    <div id="modal-palet" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-2xl p-6 w-96 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h4 class="font-bold text-dark-azure text-base">➕ Buat Palet Baru</h4>
+                <button onclick="closeModalPalet()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark"></i></button>
             </div>
+            <form onsubmit="simpanPaletBaru(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Nomor Palet Baru *</label>
+                    <input type="text" id="modal-num-palet" required placeholder="Contoh: 17 atau TURUN-01" class="w-full px-4 py-2 rounded-xl border text-sm focus:border-dark-azure focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Jenis Palet</label>
+                    <select id="modal-jenis-palet" class="w-full px-4 py-2 rounded-xl border text-sm focus:border-dark-azure focus:outline-none bg-white">
+                        <option value="Bin">Bin</option>
+                        <option value="Turun palet">Turun palet</option>
+                    </select>
+                </div>
+                <div class="pt-2 flex gap-2">
+                    <button type="button" onclick="closeModalPalet()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2.5 rounded-xl font-semibold text-xs">Batal</button>
+                    <button type="submit" class="flex-1 bg-dark-azure hover:bg-azure-hover text-white py-2.5 rounded-xl font-semibold text-xs">Simpan</button>
+                </div>
+            </form>
         </div>
+    </div>
 
-        <!-- SEARCH BAR SHIPMENT -->
-        <div class="bg-white p-3 rounded-2xl shadow-sm border border-gray-100 flex gap-3">
-            <div class="relative flex-1">
-                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-dark-azure text-lg"></i>
-                <input type="text" id="input-shipment" placeholder="Masukkan Nomor Shipment" class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-dark-azure text-sm text-gray-700">
-            </div>
-            <button onclick="cariShipment()" class="bg-dark-azure hover:bg-azure-hover text-white px-8 py-3 rounded-xl font-semibold text-sm transition">
-                Cari
-            </button>
-        </div>
-
-        <!-- RESULT CONTAINER (JIKA SHIPMENT DITEMUKAN) -->
-        <div id="search-result" class="hidden bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm text-emerald-800">
-            <!-- Hasil pencarian JS -->
-        </div>
-
-        <!-- 2 TOMBOL UTAMA (DARK AZURE) -->
-        <div class="grid grid-cols-2 gap-6">
-            <button class="bg-dark-azure hover:bg-azure-hover text-white rounded-2xl p-8 flex items-center justify-center gap-4 shadow-lg transition group">
-                <i class="fa-solid fa-boxes-packing text-3xl group-hover:scale-110 transition"></i>
-                <span class="text-xl font-bold">Penerimaan SKR</span>
-            </button>
-            <button class="bg-dark-azure hover:bg-azure-hover text-white rounded-2xl p-8 flex items-center justify-center gap-4 shadow-lg transition group">
-                <i class="fa-solid fa-truck-ramp-box text-3xl group-hover:scale-110 transition"></i>
-                <span class="text-xl font-bold">Redelivery</span>
-            </button>
-        </div>
-
-        <!-- DOWNLOAD LAPORAN BUTTON (HIJAU CANVA) -->
-        <button class="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-4 font-bold text-base flex items-center justify-center gap-3 shadow-md transition">
-            <i class="fa-solid fa-download text-lg"></i> Download Laporan Rekapitulasi Hari Ini
-        </button>
-
-    </main>
-
-    <!-- SCRIPT REALTIME SUPABASE DATA -->
+    <!-- SCRIPT SUPABASE & LOGIKA SPA -->
     <script>
         const SUPABASE_URL = "https://rmlxzhhsvcgadzcjpyxm.supabase.co";
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtbHh6aGhzdmNnYWR6Y2pweXhtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzOTE2NzAsImV4cCI6MjEwMDk2NzY3MH0.Ft0tKwqmwyNdAChPombLj3Og7QIE_1vix24V3JUmNw8";
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Fetch Count Metrics Realtime dari Supabase
-        async function fetchMetrics() {
-            const { data, error } = await _supabase.from('skr_redel').select('status_skr');
-            if (data) {
-                const menunggu = data.filter(d => d.status_skr === 'Menunggu shipment baru').length;
-                const parsial = data.filter(d => d.status_skr === 'Parsial').length;
-                const selesai = data.filter(d => d.status_skr === 'Selesai').length;
+        // Auto Fill Date Today
+        const todayStr = new Date().toISOString().split('T')[0];
+        document.getElementById('in-tgl').value = todayStr;
+        document.getElementById('redel-tgl').value = todayStr;
 
-                document.getElementById('cnt-menunggu').innerHTML = `${menunggu} <span class="text-xs font-semibold text-gray-400">SKR</span>`;
-                document.getElementById('cnt-parsial').innerHTML = `${parsial} <span class="text-xs font-semibold text-gray-400">SKR</span>`;
-                document.getElementById('cnt-selesai').innerHTML = `${selesai} <span class="text-xs font-semibold text-gray-400">SKR</span>`;
-            }
+        // Switch Halaman SPA
+        function switchPage(pageId) {
+            document.querySelectorAll('.page-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`page-${pageId}`).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.className = "nav-btn w-full flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-100 hover:text-dark-azure rounded-xl font-medium text-sm transition";
+            });
+            const activeBtn = document.getElementById(`nav-${pageId}`);
+            if(activeBtn) activeBtn.className = "nav-btn w-full flex items-center gap-3 px-4 py-2.5 bg-dark-azure text-white rounded-xl font-medium text-sm transition";
+
+            if(pageId === 'dashboard') fetchMetrics();
+            if(pageId === 'penerimaan') loadDropdownPalet();
+            if(pageId === 'redelivery') initRedeliveryForm();
+            if(pageId === 'monitoring') renderTableInbound();
+            if(pageId === 'palet') renderTablePalet();
         }
 
-        // Cari Shipment
-        async function cariShipment() {
-            const query = document.getElementById('input-shipment').value.trim();
-            const resDiv = document.getElementById('search-result');
-            
-            if(!query) return;
+        // Switch Tab Monitoring
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
 
-            const { data, error } = await _supabase
-                .from('skr_redel')
-                .select('*, penempatan(nomor_palet)')
-                .eq('no_shipment', query);
+            const btnIn = document.getElementById('btn-tab-in');
+            const btnOut = document.getElementById('btn-tab-out');
 
-            resDiv.classList.remove('hidden');
-            if(data && data.length > 0) {
-                const item = data[0];
-                const palets = item.penempatan ? item.penempatan.map(p => p.nomor_palet).join(', ') : '-';
-                resDiv.className = "bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-900";
-                resDiv.innerHTML = `<b>✅ Shipment Ditemukan:</b> ${item.no_shipment} | Delman: <b>${item.nama_delman}</b> | Nopol: <b>${item.nopol_kendaraan}</b> | Status: <b>${item.status_skr}</b> | Palet: <b>${palets}</b>`;
+            if(tabId === 'tab-in') {
+                btnIn.className = "py-3 px-6 font-bold text-sm border-b-2 border-dark-azure text-dark-azure transition";
+                btnOut.className = "py-3 px-6 font-bold text-sm border-b-2 border-transparent text-gray-400 hover:text-dark-azure transition";
+                renderTableInbound();
             } else {
-                resDiv.className = "bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-800";
-                resDiv.innerHTML = `❌ Nomor Shipment <b>"${query}"</b> tidak ditemukan di database.`;
+                btnOut.className = "py-3 px-6 font-bold text-sm border-b-2 border-dark-azure text-dark-azure transition";
+                btnIn.className = "py-3 px-6 font-bold text-sm border-b-2 border-transparent text-gray-400 hover:text-dark-azure transition";
+                renderTableOutbound();
             }
         }
 
+        // Modal Palet
+        function openModalPalet() { document.getElementById('modal-palet').classList.remove('hidden'); }
+        function closeModalPalet() { document.getElementById('modal-palet').classList.add('hidden'); }
+
+        // --- SUPABASE API CALLS ---
+
+        // 1. Fetch Dashboard Metrics
+        async function fetchMetrics() {
+            const { data } = await _supabase.from('skr_redel').select('status_skr');
+            if (data) {
+                document.getElementById('cnt-menunggu').innerHTML = `${data.filter(d => d.status_skr === 'Menunggu shipment baru').length} <span class="text-xs font-semibold text-gray-400">SKR</span>`;
+                document.getElementById('cnt-parsial').innerHTML = `${data.filter(d => d.status_skr === 'Parsial').length} <span class="text-xs font-semibold text-gray-400">SKR</span>`;
+                document.getElementById('cnt-selesai').innerHTML = `${data.filter(d => d.status_skr === 'Selesai').length} <span class="text-xs font-semibold text-gray-400">SKR</span>`;
+            }
+        }
+
+        // 2. Load Palet Dropdown
+        async function loadDropdownPalet() {
+            const select = document.getElementById('select-palet');
+            const { data } = await _supabase.from('palet').select('nomor_palet');
+            if(data) {
+                select.innerHTML = data.map(p => `<option value="${p.nomor_palet}">${p.nomor_palet}</option>`).join('');
+            }
+        }
+
+        // 3. Simpan Palet Baru
+        async function simpanPaletBaru(e) {
+            e.preventDefault();
+            const num = document.getElementById('modal-num-palet').value.trim();
+            const jenis = document.getElementById('modal-jenis-palet').value;
+
+            const { error } = await _supabase.from('palet').insert([{ nomor_palet: num, jenis_palet: jenis, status_palet: 'Available' }]);
+            if(!error) {
+                alert('Palet berhasil dibuat!');
+                closeModalPalet();
+                loadDropdownPalet();
+            } else alert('Gagal: ' + error.message);
+        }
+
+        // 4. Simpan Penerimaan SKR
+        async function simpanPenerimaan(e) {
+            e.preventDefault();
+            const noShipment = document.getElementById('in-no-shipment').value.trim();
+            const namaDelman = document.getElementById('in-nama-delman').value;
+            const nopol = document.getElementById('in-nopol').value;
+            const jenisGr = document.querySelector('input[name="jenis_gr"]:checked').value;
+            const palet = document.getElementById('select-palet').value;
+
+            const { error } = await _supabase.from('skr_redel').insert([{
+                no_shipment: noShipment, nama_delman: namaDelman, nopol_kendaraan: nopol,
+                jenis_gr: jenisGr, tanggal_penerimaan: todayStr, status_skr: 'Menunggu shipment baru'
+            }]);
+
+            if(!error) {
+                if(palet) {
+                    await _supabase.from('penempatan').insert([{ nomor_palet: palet, no_shipment: noShipment }]);
+                    await _supabase.from('palet').update({ status_palet: 'In Use' }).eq('nomor_palet', palet);
+                }
+                alert('Penerimaan SKR Berhasil Disimpan!');
+                document.getElementById('form-penerimaan').reset();
+                switchPage('monitoring');
+            } else alert('Error: ' + error.message);
+        }
+
+        // 5. Form Redel Dynamic Rows
+        let availableSkrList = [];
+        async function initRedeliveryForm() {
+            const container = document.getElementById('redel-items-container');
+            container.innerHTML = '';
+            const { data } = await _supabase.from('skr_redel').select('no_shipment').neq('status_skr', 'Selesai');
+            availableSkrList = data ? data.map(s => s.no_shipment) : [];
+            addRedelRow();
+        }
+
+        function addRedelRow() {
+            const container = document.getElementById('redel-items-container');
+            const rowIdx = container.children.length;
+            const row = document.createElement('div');
+            row.className = "grid grid-cols-12 gap-3 items-center bg-gray-50 p-3 rounded-xl border text-xs";
+            
+            const options = availableSkrList.map(s => `<option value="${s}">${s}</option>`).join('');
+
+            row.innerHTML = `
+                <div class="col-span-4">
+                    <label class="block font-semibold mb-1 text-gray-500">No. SKR</label>
+                    <select class="redel-skr-select w-full px-3 py-2 rounded-lg border bg-white">${options}</select>
+                </div>
+                <div class="col-span-3">
+                    <label class="block font-semibold mb-1 text-gray-500">Jenis Redel</label>
+                    <div class="flex gap-3 pt-1">
+                        <label><input type="radio" name="j_redel_${rowIdx}" value="Parsial" checked onchange="toggleFinalCheckbox(this)"> Parsial</label>
+                        <label><input type="radio" name="j_redel_${rowIdx}" value="Full" onchange="toggleFinalCheckbox(this)"> Full</label>
+                    </div>
+                </div>
+                <div class="col-span-4 final-box">
+                    <label class="block font-semibold mb-1 text-gray-500">Kiriman Terakhir?</label>
+                    <label class="flex items-center gap-2 pt-1"><input type="checkbox" class="redel-final-check"> Ya, Barang Habis</label>
+                </div>
+                <div class="col-span-1 text-right">
+                    ${rowIdx > 0 ? `<button type="button" onclick="this.parentElement.parentElement.remove()" class="text-red-500 hover:text-red-700 font-bold text-sm"><i class="fa-solid fa-trash"></i></button>` : ''}
+                </div>
+            `;
+            container.appendChild(row);
+        }
+
+        function toggleFinalCheckbox(radio) {
+            const finalBox = radio.parentElement.parentElement.parentElement.nextElementSibling;
+            if(radio.value === 'Full') {
+                finalBox.classList.add('invisible');
+            } else {
+                finalBox.classList.remove('invisible');
+            }
+        }
+
+        // 6. Simpan Redelivery
+        async function simpanRedelivery(e) {
+            e.preventDefault();
+            const noRedel = document.getElementById('redel-no-shipment').value.trim();
+            const namaDelman = document.getElementById('redel-nama-delman').value;
+            const nopol = document.getElementById('redel-nopol').value;
+
+            const { error } = await _supabase.from('redelivery').insert([{
+                no_shipment_redel: noRedel, nama_delman: namaDelman, nopol_kendaraan: nopol, tanggal_pengiriman: todayStr
+            }]);
+
+            if(!error) {
+                const rows = document.getElementById('redel-items-container').children;
+                for(let r of rows) {
+                    const skrVal = r.querySelector('.redel-skr-select').value;
+                    const jRedel = r.querySelector('input[type="radio"]:checked').value;
+                    const isFinal = jRedel === 'Full' ? true : r.querySelector('.redel-final-check').checked;
+
+                    await _supabase.from('detail_redel').insert([{
+                        no_shipment_redel: noRedel, no_shipment: skrVal, jenis_redel: jRedel, is_final_delivery: isFinal
+                    }]);
+
+                    const statusBaru = isFinal ? 'Selesai' : 'Parsial';
+                    await _supabase.from('skr_redel').update({ status_skr: statusBaru }).eq('no_shipment', skrVal);
+                }
+                alert('Redelivery Berhasil Disimpan!');
+                switchPage('monitoring');
+            } else alert('Error: ' + error.message);
+        }
+
+        // 7. Render Monitoring Inbound
+        async function renderTableInbound() {
+            const tbody = document.getElementById('tbody-inbound');
+            const { data } = await _supabase.from('skr_redel').select('*, penempatan(nomor_palet), detail_redel(*)');
+            
+            if(data) {
+                tbody.innerHTML = data.map(item => {
+                    const palets = item.penempatan ? item.penempatan.map(p => p.nomor_palet).join(', ') : '-';
+                    const badgeColor = item.status_skr === 'Selesai' ? 'bg-emerald-100 text-emerald-800' : item.status_skr === 'Parsial' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800';
+
+                    return `
+                        <tr>
+                            <td class="p-4"><button onclick="this.parentElement.parentElement.nextElementSibling.classList.toggle('hidden')" class="text-dark-azure"><i class="fa-solid fa-chevron-down"></i></button></td>
+                            <td class="p-4 font-bold text-dark-azure">${item.no_shipment}</td>
+                            <td class="p-4">${item.jenis_gr}</td>
+                            <td class="p-4 font-medium">${palets}</td>
+                            <td class="p-4">${item.tanggal_penerimaan}</td>
+                            <td class="p-4"><span class="px-3 py-1 rounded-full text-xs font-bold ${badgeColor}">${item.status_skr}</span></td>
+                            <td class="p-4 text-center">
+                                ${item.status_skr === 'Menunggu shipment baru' ? `<button onclick="hapusSKR('${item.no_shipment}')" class="text-red-500 hover:text-red-700 font-bold"><i class="fa-solid fa-trash"></i></button>` : `<i class="fa-solid fa-lock text-gray-300"></i>`}
+                            </td>
+                        </tr>
+                        <tr class="hidden bg-gray-50">
+                            <td colspan="7" class="p-4 text-xs">
+                                <b>🚚 Detail Histori Redelivery:</b>
+                                <div class="mt-1 space-y-1 pl-4">
+                                    ${item.detail_redel && item.detail_redel.length > 0 ? item.detail_redel.map(d => `• Redel No: <b>${d.no_shipment_redel}</b> | Jenis: ${d.jenis_redel} | Final: ${d.is_final_delivery ? '✅' : '❌'}`).join('<br>') : '<span class="text-gray-400">Belum ada histori pengiriman.</span>'}
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+
+        // Hapus SKR
+        async function hapusSKR(noShipment) {
+            if(confirm(`Yakin hapus SKR ${noShipment}?`)) {
+                await _supabase.from('skr_redel').delete().eq('no_shipment', noShipment);
+                renderTableInbound();
+            }
+        }
+
+        // 8. Render Monitoring Outbound
+        async function renderTableOutbound() {
+            const tbody = document.getElementById('tbody-outbound');
+            const { data } = await _supabase.from('redelivery').select('*, detail_redel(*)');
+            
+            if(data) {
+                tbody.innerHTML = data.map(item => `
+                    <tr>
+                        <td class="p-4"><button onclick="this.parentElement.parentElement.nextElementSibling.classList.toggle('hidden')" class="text-dark-azure"><i class="fa-solid fa-chevron-down"></i></button></td>
+                        <td class="p-4 font-bold text-dark-azure">${item.no_shipment_redel}</td>
+                        <td class="p-4">${item.nama_delman}</td>
+                        <td class="p-4">${item.nopol_kendaraan}</td>
+                        <td class="p-4">${item.tanggal_pengiriman}</td>
+                        <td class="p-4 text-center">
+                            <button onclick="hapusRedel('${item.no_shipment_redel}')" class="text-red-500 hover:text-red-700 font-bold"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                    <tr class="hidden bg-gray-50">
+                        <td colspan="6" class="p-4 text-xs">
+                            <b>📦 SKR Yang Diangkut:</b>
+                            <div class="mt-1 space-y-1 pl-4">
+                                ${item.detail_redel ? item.detail_redel.map(d => `• No SKR: <b>${d.no_shipment}</b> | Jenis: ${d.jenis_redel} | Flag Final: ${d.is_final_delivery ? '✅ Selesai' : '❌ Belum Habis'}`).join('<br>') : ''}
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        // Hapus Redel
+        async function hapusRedel(noRedel) {
+            if(confirm(`Yakin hapus Redelivery ${noRedel}?`)) {
+                await _supabase.from('redelivery').delete().eq('no_shipment_redel', noRedel);
+                renderTableOutbound();
+            }
+        }
+
+        // 9. Render Data Palet
+        async function renderTablePalet() {
+            const tbody = document.getElementById('tbody-palet');
+            const { data } = await _supabase.from('palet').select('*').order('nomor_palet');
+            if(data) {
+                tbody.innerHTML = data.map(p => `
+                    <tr>
+                        <td class="p-4 font-bold text-dark-azure">${p.nomor_palet}</td>
+                        <td class="p-4">${p.jenis_palet}</td>
+                        <td class="p-4"><span class="px-3 py-1 rounded-full text-xs font-bold ${p.status_palet === 'Available' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${p.status_palet}</span></td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        // Initialize First Page
         fetchMetrics();
     </script>
 </body>
