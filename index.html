@@ -311,7 +311,6 @@
                         </table>
                     </div>
                 </div>
-                </div>
 
                 <!-- Tab Outbound -->
                 <div id="tab-out" class="tab-content hidden space-y-4">
@@ -419,6 +418,90 @@
             </form>
         </div>
     </div>
+
+    <!-- MODAL EDIT SKR -->
+    <!-- MODAL EDIT SKR -->
+    <div id="modal-edit-skr" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4">
+            <h4 class="font-bold text-dark-azure text-base border-b pb-3">Edit Data SKR</h4>
+            <form onsubmit="updateSKR(event)" class="space-y-4">
+                <input type="hidden" id="edit-skr-old-id">
+                <input type="hidden" id="edit-skr-old-palet"> <!-- Simpan histori palet lama -->
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><label class="block text-xs font-semibold mb-1">No. Shipment</label><input type="text" id="edit-skr-id" required class="w-full px-4 py-2 rounded-xl border text-sm focus:border-dark-azure focus:outline-none"></div>
+                    <div><label class="block text-xs font-semibold mb-1">Tanggal Penerimaan/label><input type="date" id="edit-skr-tgl" required class="w-full px-4 py-2 rounded-xl border text-sm focus:border-dark-azure focus:outline-none text-gray-700"></div>
+                    <div><label class="block text-xs font-semibold mb-1">Nama DelMan</label><input type="text" id="edit-skr-delman" class="w-full px-4 py-2 rounded-xl border text-sm focus:border-dark-azure focus:outline-none"></div>
+                    <div><label class="block text-xs font-semibold mb-1">Nomor Kendaraan</label><input type="text" id="edit-skr-nopol" class="w-full px-4 py-2 rounded-xl border text-sm focus:border-dark-azure focus:outline-none"></div>
+                    
+                    <div class="md:col-span-1">
+                        <label class="block text-xs font-semibold mb-1">Jenis GR</label>
+                        <select id="edit-skr-jenis" class="w-full px-4 py-2 rounded-xl border text-sm bg-white focus:border-dark-azure focus:outline-none">
+                            <option value="Sistem">Sistem</option>
+                            <option value="Turun gudang">Turun Gudang</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-1">
+                        <label class="block text-xs font-semibold mb-1">Nomor Palet</label>
+                        <select id="edit-skr-palet" class="w-full px-4 py-2 rounded-xl border text-sm bg-white focus:border-dark-azure focus:outline-none">
+                            <!-- Option palet akan dimuat via JS -->
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="pt-2 flex gap-2">
+                    <button type="button" onclick="closeEditModal('modal-edit-skr')" class="flex-1 bg-gray-100 hover:bg-gray-200 py-2.5 rounded-xl font-semibold text-xs transition">Batal</button>
+                    <button type="submit" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-2.5 rounded-xl font-semibold text-xs transition">Update Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL EDIT REDELIVERY -->
+    <div id="modal-edit-redel" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4">
+            <h4 class="font-bold text-dark-azure text-base border-b pb-3">Edit Data Redelivery</h4>
+            <form onsubmit="updateRedel(event)" class="space-y-4">
+                <input type="hidden" id="edit-redel-old-id">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><label class="block text-xs font-semibold mb-1">No. Shipment</label><input type="text" id="edit-redel-id" required class="w-full px-4 py-2 rounded-xl border text-sm focus:border-dark-azure focus:outline-none"></div>
+                    <div><label class="block text-xs font-semibold mb-1">Tanggal Kirim</label><input type="date" id="edit-redel-tgl" required class="w-full px-4 py-2 rounded-xl border text-sm focus:border-dark-azure focus:outline-none text-gray-700"></div>
+                    <div><label class="block text-xs font-semibold mb-1">Nama DelMan</label><input type="text" id="edit-redel-delman" class="w-full px-4 py-2 rounded-xl border text-sm focus:border-dark-azure focus:outline-none"></div>
+                    <div><label class="block text-xs font-semibold mb-1">Nomor Kendaraan</label><input type="text" id="edit-redel-nopol" class="w-full px-4 py-2 rounded-xl border text-sm focus:border-dark-azure focus:outline-none"></div>
+                </div>
+                
+                <div class="pt-2 flex gap-2">
+                    <button type="button" onclick="closeEditModal('modal-edit-redel')" class="flex-1 bg-gray-100 hover:bg-gray-200 py-2.5 rounded-xl font-semibold text-xs transition">Batal</button>
+                    <button type="submit" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-2.5 rounded-xl font-semibold text-xs transition">Update Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL EDIT PALET -->
+    <div id="modal-edit-palet" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4">
+            <h4 class="font-bold text-dark-azure text-base border-b pb-3">Edit Data Palet</h4>
+            <form onsubmit="updatePalet(event)" class="space-y-4">
+                <input type="hidden" id="edit-palet-id">
+                <div>
+                    <label class="block text-xs font-semibold mb-1">Jenis Palet</label>
+                    <select id="edit-palet-jenis" class="w-full px-4 py-2 rounded-xl border text-sm bg-white focus:border-dark-azure focus:outline-none"><option>Bin</option><option>Turun palet</option></select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold mb-1">Status Palet</label>
+                    <select id="edit-palet-status" class="w-full px-4 py-2 rounded-xl border text-sm bg-white focus:border-dark-azure focus:outline-none"><option>Available</option><option>In Use</option></select>
+                </div>
+                <div class="pt-2 flex gap-2">
+                    <button type="button" onclick="closeEditModal('modal-edit-palet')" class="flex-1 bg-gray-100 py-2.5 rounded-xl font-semibold text-xs">Batal</button>
+                    <button type="submit" class="flex-1 bg-amber-500 text-white py-2.5 rounded-xl font-semibold text-xs">Update Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
 
     <script>
         const SUPABASE_URL = "https://rmlxzhhsvcgadzcjpyxm.supabase.co";
@@ -687,17 +770,10 @@
             const searchVal = document.getElementById('filter-search-skr').value.toLowerCase();
             const grVal = document.getElementById('filter-gr').value;
             const statusVal = document.getElementById('filter-status').value;
-
             let { data } = await _supabase.from('skr_redel').select('*, penempatan(nomor_palet), detail_redel(*)');
             
             if(data) {
-                if(searchVal) {
-                    data = data.filter(s => 
-                        s.no_shipment.toLowerCase().includes(searchVal) || 
-                        (s.nama_delman && s.nama_delman.toLowerCase().includes(searchVal)) ||
-                        (s.tanggal_penerimaan && s.tanggal_penerimaan.includes(searchVal))
-                    );
-                }
+                if(searchVal) data = data.filter(s => s.no_shipment.toLowerCase().includes(searchVal) || (s.nama_delman && s.nama_delman.toLowerCase().includes(searchVal)) || (s.tanggal_penerimaan && s.tanggal_penerimaan.includes(searchVal)));
                 if(grVal) data = data.filter(s => s.jenis_gr === grVal);
                 if(statusVal) data = data.filter(s => s.status_skr === statusVal);
 
@@ -705,7 +781,7 @@
                     const palets = item.penempatan && item.penempatan.length > 0 ? item.penempatan.map(p => p.nomor_palet).join(', ') : '-';
                     const badgeColor = item.status_skr === 'Selesai' ? 'bg-emerald-100 text-emerald-800' : item.status_skr === 'Parsial' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800';
                     const isDeletable = item.status_skr === 'Menunggu shipment baru';
-
+                    
                     return `
                         <tr class="whitespace-nowrap hover:bg-gray-50 transition">
                             <td class="p-4"><button onclick="this.parentElement.parentElement.nextElementSibling.classList.toggle('hidden')" class="text-dark-azure hover:text-azure-hover font-bold"><i class="fa-solid fa-chevron-down"></i></button></td>
@@ -716,12 +792,15 @@
                             <td class="p-4">${item.jenis_gr}</td>
                             <td class="p-4 font-medium">${palets}</td>
                             <td class="p-4"><span class="px-3 py-1 rounded-full text-[10px] md:text-xs font-bold ${badgeColor}">${item.status_skr}</span></td>
-                            <td class="p-4 text-center">
+                            <td class="p-4 text-center space-x-2">
+                                <!-- INI DIA TOMBOL EDITNYA YANG SUDAH LENGKAP -->
+                                <button onclick="bukaEditSKR('${item.no_shipment}', '${item.tanggal_penerimaan}', '${item.nama_delman}', '${item.nopol_kendaraan}', '${item.jenis_gr}', '${palets}')" class="text-amber-500 hover:text-amber-600 font-bold" title="Edit Data"><i class="fa-solid fa-pen-to-square"></i></button>
+                                
                                 ${isDeletable ? `<button onclick="hapusSKR('${item.no_shipment}')" class="text-red-500 hover:text-red-700 font-bold" title="Hapus"><i class="fa-solid fa-trash"></i></button>` : `<i class="fa-solid fa-lock text-gray-300" title="Terkunci (Sudah ada Redelivery)"></i>`}
                             </td>
                         </tr>
                         <tr class="hidden bg-gray-50 border-b">
-                            <td colspan="9" class="p-4 text-xs"> <!-- colspan disesuaikan jadi 9 -->
+                            <td colspan="9" class="p-4 text-xs">
                                 <div class="font-bold text-dark-azure mb-1">🚚 Detail Histori Redelivery:</div>
                                 <div class="space-y-1 pl-4">
                                     ${item.detail_redel && item.detail_redel.length > 0 ? item.detail_redel.map(d => `• Redel No: <b>${d.no_shipment_redel}</b> | Jenis: ${d.jenis_redel} | Status Final: ${d.is_final_delivery ? '✅ Selesai' : '❌ Parsial'}`).join('<br>') : '<span class="text-gray-400">Belum ada histori pengiriman.</span>'}
@@ -825,6 +904,114 @@
                         <td class="p-4"><span class="px-3 py-1 rounded-full text-[10px] md:text-xs font-bold ${p.status_palet === 'Available' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${p.status_palet}</span></td>
                     </tr>
                 `).join('');
+            }
+        }
+        // EDIT SKR LENGKAP & LOGIKA PALET
+        function bukaEditSKR(oldId, tgl, delman, nopol, jenis, paletString) {
+            document.getElementById('edit-skr-old-id').value = oldId;
+            document.getElementById('edit-skr-id').value = oldId; 
+            document.getElementById('edit-skr-tgl').value = tgl;
+            document.getElementById('edit-skr-delman').value = (!delman || delman === 'null' || delman === '-') ? '' : delman;
+            document.getElementById('edit-skr-nopol').value = (!nopol || nopol === 'null' || nopol === '-') ? '' : nopol;
+            document.getElementById('edit-skr-jenis').value = jenis;
+
+            // Ambil palet lama (asumsi ngambil 1 palet utama jika ada lebih dari 1)
+            const oldPalet = (!paletString || paletString === '-') ? '' : paletString.split(',')[0].trim();
+            document.getElementById('edit-skr-old-palet').value = oldPalet;
+
+            // Render Dropdown Palet
+            const selectPalet = document.getElementById('edit-skr-palet');
+            const { data } = await _supabase.from('palet').select('nomor_palet').eq('status_palet', 'Available');
+            
+            let options = `<option value="">-- Tidak pakai palet --</option>`;
+            if (oldPalet) {
+                options += `<option value="${oldPalet}" selected>${oldPalet} (Palet saat ini)</option>`;
+            }
+            if (data && data.length > 0) {
+                options += data.map(p => `<option value="${p.nomor_palet}">${p.nomor_palet}</option>`).join('');
+            }
+            selectPalet.innerHTML = options;
+            if(oldPalet) selectPalet.value = oldPalet; // Pastikan terpilih (Pre-filled)
+
+            document.getElementById('modal-edit-skr').classList.remove('hidden');
+        }
+
+        async function updateSKR(e) {
+            e.preventDefault();
+            const oldId = document.getElementById('edit-skr-old-id').value;
+            const newId = document.getElementById('edit-skr-id').value.trim();
+            const tgl = document.getElementById('edit-skr-tgl').value;
+            const delman = document.getElementById('edit-skr-delman').value;
+            const nopol = document.getElementById('edit-skr-nopol').value;
+            const jenis = document.getElementById('edit-skr-jenis').value;
+            
+            const oldPalet = document.getElementById('edit-skr-old-palet').value;
+            const newPalet = document.getElementById('edit-skr-palet').value;
+
+            // 1. Update SKR Utama
+            const { error: errSkr } = await _supabase.from('skr_redel').update({ 
+                no_shipment: newId, 
+                tanggal_penerimaan: tgl,
+                nama_delman: delman, 
+                nopol_kendaraan: nopol,
+                jenis_gr: jenis
+            }).eq('no_shipment', oldId);
+
+            if(errSkr) {
+                alert('Gagal Update SKR: ' + errSkr.message);
+                return;
+            }
+
+            // 2. Logika Tukar Palet (Jika palet diubah)
+            if (oldPalet !== newPalet) {
+                // A. Lepas palet lama (jadikan Available)
+                if (oldPalet) {
+                    // Kita pakai id shipment yang baru (newId) jaga-jaga kalau no_shipment-nya juga ikut diubah user
+                    await _supabase.from('penempatan').delete().eq('nomor_palet', oldPalet);
+                    await _supabase.from('palet').update({ status_palet: 'Available' }).eq('nomor_palet', oldPalet);
+                }
+                // B. Pasang palet baru (jadikan In Use)
+                if (newPalet) {
+                    await _supabase.from('penempatan').insert([{ no_shipment: newId, nomor_palet: newPalet }]);
+                    await _supabase.from('palet').update({ status_palet: 'In Use' }).eq('nomor_palet', newPalet);
+                }
+            }
+
+            closeEditModal('modal-edit-skr'); 
+            renderTableInbound(); 
+            if(typeof loadDropdownPalet === "function") loadDropdownPalet(); // Refresh form penerimaan di latar
+        }
+
+        // EDIT REDELIVERY LENGKAP
+        function bukaEditRedel(oldId, tgl, delman, nopol) {
+            document.getElementById('edit-redel-old-id').value = oldId;
+            document.getElementById('edit-redel-id').value = oldId;
+            document.getElementById('edit-redel-tgl').value = tgl;
+            document.getElementById('edit-redel-delman').value = delman === 'null' ? '' : delman;
+            document.getElementById('edit-redel-nopol').value = nopol === 'null' ? '' : nopol;
+            document.getElementById('modal-edit-redel').classList.remove('hidden');
+        }
+
+        async function updateRedel(e) {
+            e.preventDefault();
+            const oldId = document.getElementById('edit-redel-old-id').value;
+            const newId = document.getElementById('edit-redel-id').value.trim();
+            const tgl = document.getElementById('edit-redel-tgl').value;
+            const delman = document.getElementById('edit-redel-delman').value;
+            const nopol = document.getElementById('edit-redel-nopol').value;
+
+            const { error } = await _supabase.from('redelivery').update({ 
+                no_shipment_redel: newId,
+                tanggal_pengiriman: tgl, 
+                nama_delman: delman, 
+                nopol_kendaraan: nopol 
+            }).eq('no_shipment_redel', oldId);
+
+            if(!error) { 
+                closeEditModal('modal-edit-redel'); 
+                renderTableOutbound(); 
+            } else { 
+                alert('Gagal Update Redelivery:\n' + error.message); 
             }
         }
         // ==========================================
