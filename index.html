@@ -430,7 +430,7 @@
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div><label class="block text-xs font-semibold mb-1">No. Shipment</label><input type="text" id="edit-skr-id" required class="w-full px-4 py-2 rounded-xl border text-sm focus:border-dark-azure focus:outline-none"></div>
-                    <div><label class="block text-xs font-semibold mb-1">Tanggal Penerimaan/label><input type="date" id="edit-skr-tgl" required class="w-full px-4 py-2 rounded-xl border text-sm focus:border-dark-azure focus:outline-none text-gray-700"></div>
+                    <div><label class="block text-xs font-semibold mb-1">Tanggal Penerimaan</label><input type="date" id="edit-skr-tgl" required class="w-full px-4 py-2 rounded-xl border text-sm focus:border-dark-azure focus:outline-none text-gray-700"></div>
                     <div><label class="block text-xs font-semibold mb-1">Nama DelMan</label><input type="text" id="edit-skr-delman" class="w-full px-4 py-2 rounded-xl border text-sm focus:border-dark-azure focus:outline-none"></div>
                     <div><label class="block text-xs font-semibold mb-1">Nomor Kendaraan</label><input type="text" id="edit-skr-nopol" class="w-full px-4 py-2 rounded-xl border text-sm focus:border-dark-azure focus:outline-none"></div>
                     
@@ -907,6 +907,9 @@
             }
         }
         // EDIT SKR LENGKAP & LOGIKA PALET
+        function closeEditModal(modalId) { 
+            document.getElementById(modalId).classList.add('hidden'); 
+        }
         async function bukaEditSKR(oldId, tgl, delman, nopol, jenis, paletString) {
             document.getElementById('edit-skr-old-id').value = oldId;
             document.getElementById('edit-skr-id').value = oldId; 
