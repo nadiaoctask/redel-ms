@@ -715,7 +715,7 @@
 
             // 3. KALAU DUA-DUANYA GAK KETEMU
             resultBox.className = 'p-4 rounded-xl border text-sm bg-red-50 border-red-200 text-red-700 block';
-            resultBox.innerHTML = `<i class="fa-solid fa-circle-xmark mr-2"></i> Data <b>${searchInput}</b> Data tidak ditemukan.`;
+            resultBox.innerHTML = `<i class="fa-solid fa-circle-xmark mr-2"></i> Data <b>${searchInput}</b> tidak ditemukan di Inbound maupun Outbound.`;
         }
 
         // --- FORM PENERIMAAN LOGIC ---
@@ -1149,56 +1149,7 @@
             }
         }
 
-        async function searchShipmentDashboard() {
-            const searchInput = document.getElementById('dash-search-input').value.trim();
-            const resultBox = document.getElementById('dash-search-result');
-
-            if (!searchInput) {
-                resultBox.classList.add('hidden');
-                return;
-            }
-
-            // Tampilkan status loading
-            resultBox.className = 'p-4 rounded-xl border text-sm bg-gray-50 border-gray-200 text-gray-500 block';
-            resultBox.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Mencari data...';
-
-            // Query Supabase: Select dari skr_redel dan Join ke tabel penempatan
-            const { data, error } = await _supabase
-                .from('skr_redel')
-                .select('*, penempatan(nomor_palet)')
-                .eq('no_shipment', searchInput)
-                .single(); // Pakai single() karena kita ekspektasi 1 hasil spesifik
-
-            if (error || !data) {
-                // Jika tidak ditemukan
-                resultBox.className = 'p-4 rounded-xl border text-sm bg-red-50 border-red-200 text-red-700 block';
-                resultBox.innerHTML = `<i class="fa-solid fa-circle-xmark mr-2"></i> Shipment <b>${searchInput}</b> tidak ditemukan di dalam sistem.`;
-            } else {
-                // Jika ditemukan, olah data palet dan null handling
-                const palets = data.penempatan && data.penempatan.length > 0
-                    ? data.penempatan.map(p => p.nomor_palet).join(', ')
-                    : '-';
-
-                const delman = data.nama_delman && data.nama_delman !== 'null' && data.nama_delman !== '-' ? data.nama_delman : '-';
-                const nopol = data.nopol_kendaraan && data.nopol_kendaraan !== 'null' && data.nopol_kendaraan !== '-' ? data.nopol_kendaraan : '-';
-
-                // Sesuaikan warna dan format persis seperti desain (Light Blue)
-                resultBox.className = 'p-4 rounded-xl border text-sm bg-[#f0f6ff] border-[#d1e2ff] text-dark-azure block';
-                resultBox.innerHTML = `
-                    <div class="flex items-start md:items-center gap-2">
-                        <i class="fa-solid fa-square-check text-emerald-500 text-lg mt-0.5 md:mt-0"></i>
-                        <span class="leading-relaxed text-gray-700">
-                            <b class="text-dark-azure">Shipment Ditemukan:</b> ${data.no_shipment} 
-                            <span class="inline-block mx-1">Delman: <b>${delman}</b> |</span> 
-                            <span class="inline-block mx-1">Nopol: <b>${nopol}</b> </span>
-                            <span class="inline-block mx-1">Status: <b class="text-dark-azure">${data.status_skr}</b> |</span> 
-                            <span class="inline-block mx-1">Palet: <b>${palets}</b></span>
-                        </span>
-                    </div>
-                `;
-            }
-        }
-        // ==========================================
+                // ==========================================
     // LOGIKA LAPORAN REKAP EXCEL (SHEETJS)
     // ==========================================
 
