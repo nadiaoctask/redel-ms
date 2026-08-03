@@ -849,10 +849,11 @@
                     <tr class="whitespace-nowrap hover:bg-gray-50 transition">
                         <td class="p-4"><button onclick="this.parentElement.parentElement.nextElementSibling.classList.toggle('hidden')" class="text-dark-azure hover:text-azure-hover font-bold"><i class="fa-solid fa-chevron-down"></i></button></td>
                         <td class="p-4 font-bold text-dark-azure">${item.no_shipment_redel}</td>
-                        <td class="p-4">${item.nama_delman || '-'}</td>
-                        <td class="p-4">${item.nopol_kendaraan || '-'}</td>
+                        <td class="p-4">${item.nama_delman && item.nama_delman !== 'null' ? item.nama_delman : '-'}</td>
+                        <td class="p-4">${item.nopol_kendaraan && item.nopol_kendaraan !== 'null' ? item.nopol_kendaraan : '-'}</td>
                         <td class="p-4 font-medium text-gray-700">${item.tanggal_pengiriman}</td>
-                        <td class="p-4 text-center">
+                        <td class="p-4 text-center space-x-2">
+                            <button onclick="bukaEditRedel('${item.no_shipment_redel}', '${item.tanggal_pengiriman}', '${item.nama_delman}', '${item.nopol_kendaraan}')" class="text-amber-500 hover:text-amber-600 font-bold" title="Edit Data"><i class="fa-solid fa-pen-to-square"></i></button>
                             <button onclick="hapusRedel('${item.no_shipment_redel}')" class="text-red-500 hover:text-red-700 font-bold" title="Hapus"><i class="fa-solid fa-trash"></i></button>
                         </td>
                     </tr>
@@ -891,36 +892,6 @@
             if(confirm(`Yakin ingin menghapus SKR ${noShipment}?`)) {
                 await _supabase.from('skr_redel').delete().eq('no_shipment', noShipment);
                 renderTableInbound();
-            }
-        }
-
-        async function renderTableOutbound() {
-            const tbody = document.getElementById('tbody-outbound');
-            const searchVal = document.getElementById('filter-search-redel').value.toLowerCase();
-            let { data } = await _supabase.from('redelivery').select('*, detail_redel(*)');
-            
-            if(data) {
-                if(searchVal) data = data.filter(r => r.no_shipment_redel.toLowerCase().includes(searchVal) || (r.nama_delman && r.nama_delman.toLowerCase().includes(searchVal)));
-
-                tbody.innerHTML = data.map(item => `
-                    <tr class="whitespace-nowrap">
-                        <td class="p-4"><button onclick="this.parentElement.parentElement.nextElementSibling.classList.toggle('hidden')" class="text-dark-azure hover:text-azure-hover font-bold"><i class="fa-solid fa-chevron-down"></i></button></td>
-                        <td class="p-4 font-bold text-dark-azure">${item.no_shipment_redel}</td>
-                        <td class="p-4">${item.nama_delman}</td>
-                        <td class="p-4">${item.tanggal_pengiriman}</td>
-                        <td class="p-4 text-center">
-                            <button onclick="hapusRedel('${item.no_shipment_redel}')" class="text-red-500 hover:text-red-700 font-bold" title="Hapus"><i class="fa-solid fa-trash"></i></button>
-                        </td>
-                    </tr>
-                    <tr class="hidden bg-gray-50 border-b">
-                        <td colspan="5" class="p-4 text-xs">
-                            <div class="font-bold text-dark-azure mb-1">📦 SKR Yang Diangkut Dalam Surat Jalan Ini:</div>
-                            <div class="space-y-1 pl-4">
-                                ${item.detail_redel ? item.detail_redel.map(d => `• No SKR: <b>${d.no_shipment}</b> | Jenis: ${d.jenis_redel} | Status Final: ${d.is_final_delivery ? '✅ Selesai (Cleared)' : '❌ Parsial'}`).join('<br>') : ''}
-                            </div>
-                        </td>
-                    </tr>
-                `).join('');
             }
         }
 
