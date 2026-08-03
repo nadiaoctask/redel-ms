@@ -132,15 +132,20 @@
                 </div>
 
                 <!-- Search Bar -->
-                <div class="bg-white p-2 md:p-3 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-2 md:gap-3">
+                <div class="bg-white rounded-2xl p-3 md:p-4 shadow-sm border border-gray-100 flex flex-col md:flex-row gap-3">
                     <div class="relative flex-1">
-                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-dark-azure text-base"></i>
-                        <input type="text" id="input-shipment" placeholder="Masukkan Nomor Shipment..." class="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-dark-azure text-sm">
+                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" id="dash-search-input" onkeypress="if(event.key === 'Enter') searchShipmentDashboard()" placeholder="Cari No. Shipment..." class="w-full pl-10 pr-4 py-3 rounded-xl border text-sm focus:border-dark-azure focus:outline-none bg-gray-50">
                     </div>
-                    <button onclick="cariShipment()" class="bg-dark-azure hover:bg-azure-hover text-white px-8 py-3 rounded-xl font-semibold text-sm transition">Cari</button>
+                    <button onclick="searchShipmentDashboard()" class="w-full md:w-auto bg-dark-azure hover:bg-azure-hover text-white px-8 py-3 rounded-xl font-bold text-sm transition shadow-sm">
+                        Cari
+                    </button>
                 </div>
 
-                <div id="search-result" class="hidden rounded-xl p-4 text-xs md:text-sm"></div>
+                <!-- KOTAK HASIL SEARCH -->
+                <div id="dash-search-result" class="hidden p-4 rounded-xl border text-sm shadow-sm transition">
+                    <!-- Data hasil join table akan dimunculkan di sini -->
+                </div>
 
                 <!-- Action Buttons -->
                 <div class="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-gray-100">
@@ -875,7 +880,7 @@
                                                 <tr class="hover:bg-gray-50">
                                                     <td class="py-2 px-3 font-bold text-dark-azure">${d.no_shipment}</td>
                                                     <td class="py-2 px-3">${d.jenis_redel}</td>
-                                                    <td class="py-2 px-3">${d.is_final_delivery ? '<span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-bold text-[10px]">✅ Cleared</span>' : '<span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-bold text-[10px]">❌ Parsial</span>'}</td>
+                                                    <td class="py-2 px-3">${d.is_final_delivery ? '<span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-bold text-[10px]"> Cleared</span>' : '<span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-bold text-[10px]">❌ Parsial</span>'}</td>
                                                 </tr>
                                             `).join('')}
                                         </tbody>
@@ -1024,6 +1029,56 @@
                 renderTableOutbound(); 
             } else { 
                 alert('Gagal Update Redelivery:\n' + error.message); 
+            }
+        }
+
+        async function searchShipmentDashboard() {
+            const searchInput = document.getElementById('dash-search-input').value.trim();
+            const resultBox = document.getElementById('dash-search-result');
+
+            if (!searchInput) {
+                resultBox.classList.add('hidden');
+                return;
+            }
+
+            // Tampilkan status loading
+            resultBox.className = 'p-4 rounded-xl border text-sm bg-gray-50 border-gray-200 text-gray-500 block';
+            resultBox.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Mencari data...';
+
+            // Query Supabase: Select dari skr_redel dan Join ke tabel penempatan
+            const { data, error } = await _supabase
+                .from('skr_redel')
+                .select('*, penempatan(nomor_palet)')
+                .eq('no_shipment', searchInput)
+                .single(); // Pakai single() karena kita ekspektasi 1 hasil spesifik
+
+            if (error || !data) {
+                // Jika tidak ditemukan
+                resultBox.className = 'p-4 rounded-xl border text-sm bg-red-50 border-red-200 text-red-700 block';
+                resultBox.innerHTML = `<i class="fa-solid fa-circle-xmark mr-2"></i> Shipment <b>${searchInput}</b> tidak ditemukan di dalam sistem.`;
+            } else {
+                // Jika ditemukan, olah data palet dan null handling
+                const palets = data.penempatan && data.penempatan.length > 0
+                    ? data.penempatan.map(p => p.nomor_palet).join(', ')
+                    : '-';
+
+                const delman = data.nama_delman && data.nama_delman !== 'null' && data.nama_delman !== '-' ? data.nama_delman : '-';
+                const nopol = data.nopol_kendaraan && data.nopol_kendaraan !== 'null' && data.nopol_kendaraan !== '-' ? data.nopol_kendaraan : '-';
+
+                // Sesuaikan warna dan format persis seperti desain (Light Blue)
+                resultBox.className = 'p-4 rounded-xl border text-sm bg-[#f0f6ff] border-[#d1e2ff] text-dark-azure block';
+                resultBox.innerHTML = `
+                    <div class="flex items-start md:items-center gap-2">
+                        <i class="fa-solid fa-square-check text-emerald-500 text-lg mt-0.5 md:mt-0"></i>
+                        <span class="leading-relaxed text-gray-700">
+                            <b class="text-dark-azure">Shipment Ditemukan:</b> ${data.no_shipment} 
+                            <span class="inline-block mx-1">Delman: <b>${delman}</b> |</span> 
+                            <span class="inline-block mx-1">Nopol: <b>${nopol}</b> </span>
+                            <span class="inline-block mx-1">Status: <b class="text-dark-azure">${data.status_skr}</b> |</span> 
+                            <span class="inline-block mx-1">Palet: <b>${palets}</b></span>
+                        </span>
+                    </div>
+                `;
             }
         }
         // ==========================================
