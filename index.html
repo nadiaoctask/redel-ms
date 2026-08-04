@@ -205,9 +205,24 @@
                             </div>
                             <div>
                                 <label class="block text-[11px] md:text-xs font-semibold text-gray-600 mb-1">Pilih Palet</label>
-                                <div class="flex gap-2 h-[42px]">
-                                    <select id="select-palet" class="flex-1 px-4 py-2.5 rounded-xl border text-sm bg-white focus:border-dark-azure focus:outline-none"></select>
-                                    <button type="button" onclick="openModalPalet()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 rounded-xl font-medium text-xs transition">
+                                <div class="flex gap-2 items-start h-auto">
+                                    
+                                    <!-- Kotak Dropdown Custom -->
+                                    <div class="relative flex-1">
+                                        <!-- Tombol Pemicu Dropdown -->
+                                        <button type="button" onclick="document.getElementById('palet-dropdown-menu').classList.toggle('hidden')" class="w-full px-4 py-2.5 h-[42px] rounded-xl border text-sm text-left bg-white focus:border-dark-azure flex justify-between items-center outline-none">
+                                            <span id="palet-selected-text" class="truncate text-gray-500">Pilih Palet...</span>
+                                            <i class="fa-solid fa-chevron-down text-gray-400"></i>
+                                        </button>
+                                        
+                                        <!-- Isi Dropdown (Sembunyi) -->
+                                        <div id="palet-dropdown-menu" class="hidden absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-xl max-h-48 overflow-y-auto">
+                                            <!-- Checkbox list dimuat via JS -->
+                                        </div>
+                                    </div>
+
+                                    <!-- Tombol Buat Palet Baru -->
+                                    <button type="button" onclick="openModalPalet()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 h-[42px] rounded-xl font-medium text-xs transition whitespace-nowrap">
                                         + Palet Baru
                                     </button>
                                 </div>
@@ -718,24 +733,48 @@
             resultBox.innerHTML = `<i class="fa-solid fa-circle-xmark mr-2"></i> Data <b>${searchInput}</b> tidak ditemukan di Inbound maupun Outbound.`;
         }
 
-        // --- FORM PENERIMAAN LOGIC ---
-        // --- FORM PENERIMAAN LOGIC ---
-    
-    // Tambahkan parameter 'selectedPalet' di sini
-        async function loadDropdownPalet(selectedPalet = null) {
-            const select = document.getElementById('select-palet');
+        
+        async function loadDropdownPalet() {
+            const menu = document.getElementById('palet-dropdown-menu');
+            if(!menu) return;
+            
             const { data } = await _supabase.from('palet').select('nomor_palet').eq('status_palet', 'Available');
-            if(data && data.length > 0) {
-                select.innerHTML = data.map(p => `<option value="${p.nomor_palet}">${p.nomor_palet}</option>`).join('');
-                
-                // LOGIKA BARU: Jika ada palet baru dibuat, otomatis jadikan itu sebagai yang terpilih
-                if(selectedPalet) {
-                    select.value = selectedPalet;
-                }
+            
+            if (data && data.length > 0) {
+                menu.innerHTML = data.map(p => `
+                    <label class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-0 transition">
+                        <input type="checkbox" name="palet_pilihan" value="${p.nomor_palet}" onchange="updateSelectedPaletText()" class="w-4 h-4 text-dark-azure rounded border-gray-300">
+                        <span class="text-sm font-medium text-gray-700">${p.nomor_palet}</span>
+                    </label>
+                `).join('');
             } else {
-                select.innerHTML = `<option value="">Tidak ada palet kosong</option>`;
+                menu.innerHTML = '<div class="px-4 py-3 text-sm text-gray-400 italic">Semua palet In Use</div>';
+            }
+            updateSelectedPaletText();
+        }
+
+        // 2. Fungsi update teks "Pilih Palet..." menjadi "1, 2, 3"
+        function updateSelectedPaletText() {
+            const selected = Array.from(document.querySelectorAll('input[name="palet_pilihan"]:checked')).map(cb => cb.value);
+            const textSpan = document.getElementById('palet-selected-text');
+            
+            if (selected.length === 0) {
+                textSpan.textContent = 'Pilih Palet...';
+                textSpan.classList.replace('text-gray-900', 'text-gray-500');
+            } else {
+                textSpan.textContent = selected.join(', ');
+                textSpan.classList.replace('text-gray-500', 'text-gray-900');
             }
         }
+
+        // 3. Menutup dropdown jika user klik di luar kotak
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('palet-dropdown-menu');
+            const btn = menu?.previousElementSibling;
+            if (menu && !menu.classList.contains('hidden') && !menu.contains(event.target) && !btn.contains(event.target)) {
+                menu.classList.add('hidden');
+            }
+        });
 
         async function simpanPaletBaru(e) {
             e.preventDefault();
@@ -757,26 +796,49 @@
 
         async function simpanPenerimaan(e) {
             e.preventDefault();
+            
+            // Ambil data form biasa
             const noShipment = document.getElementById('in-no-shipment').value.trim();
-            const namaDelman = document.getElementById('in-nama-delman').value;
-            const nopol = document.getElementById('in-nopol').value;
             const jenisGr = document.querySelector('input[name="jenis_gr"]:checked').value;
-            const palet = document.getElementById('select-palet').value;
+            const delman = document.getElementById('in-nama-delman').value;
+            const nopol = document.getElementById('in-nopol').value;
+            const tgl = document.getElementById('in-tgl').value;
+            
+            // Ambil array palet yang dicentang (Multi Select)
+            const selectedPalets = Array.from(document.querySelectorAll('input[name="palet_pilihan"]:checked')).map(cb => cb.value);
 
-            const { error } = await _supabase.from('skr_redel').insert([{
-                no_shipment: noShipment, nama_delman: namaDelman, nopol_kendaraan: nopol,
-                jenis_gr: jenisGr, tanggal_penerimaan: todayStr, status_skr: 'Menunggu shipment baru'
+            // 1. Simpan ke skr_redel
+            const { error: errSkr } = await _supabase.from('skr_redel').insert([{
+                no_shipment: noShipment,
+                jenis_gr: jenisGr,
+                nama_delman: delman,
+                nopol_kendaraan: nopol,
+                tanggal_penerimaan: tgl,
+                status_skr: 'Menunggu shipment baru'
             }]);
 
-            if(!error) {
-                if(palet) {
-                    await _supabase.from('penempatan').insert([{ nomor_palet: palet, no_shipment: noShipment }]);
-                    await _supabase.from('palet').update({ status_palet: 'In Use' }).eq('nomor_palet', palet);
-                }
-                alert('Penerimaan SKR Berhasil Disimpan!');
-                document.getElementById('form-penerimaan').reset();
-                switchPage('monitoring');
-            } else alert('Gagal simpan penerimaan: ' + error.message);
+            if (errSkr) {
+                alert('Gagal simpan SKR: ' + errSkr.message);
+                return;
+            }
+
+            // 2. Simpan Multi Palet ke Relasi (Jika ada yang dipilih)
+            if (selectedPalets.length > 0) {
+                const penempatanData = selectedPalets.map(p => ({ no_shipment: noShipment, nomor_palet: p }));
+                await _supabase.from('penempatan').insert(penempatanData);
+                await _supabase.from('palet').update({ status_palet: 'In Use' }).in('nomor_palet', selectedPalets);
+            }
+
+            alert('Data Penerimaan Berhasil Disimpan!');
+            document.getElementById('form-penerimaan').reset();
+            
+            // Refresh & Kembalikan teks dropdown ke default
+            loadDropdownPalet(); 
+            const textSpan = document.getElementById('palet-selected-text');
+            if(textSpan) {
+                textSpan.textContent = 'Pilih Palet...';
+                textSpan.classList.replace('text-gray-900', 'text-gray-500');
+            }
         }
 
         // --- FORM REDELIVERY LOGIC (FIXED) ---
