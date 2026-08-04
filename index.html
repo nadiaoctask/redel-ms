@@ -734,22 +734,36 @@
         }
 
         
-        async function loadDropdownPalet() {
+        async function loadDropdownPalet(autoSelectPalet = null) {
             const menu = document.getElementById('palet-dropdown-menu');
             if(!menu) return;
             
-            const { data } = await _supabase.from('palet').select('nomor_palet').eq('status_palet', 'Available');
+            // HAPUS filter eq('status_palet', 'Available') agar SEMUA palet muncul
+            const { data } = await _supabase.from('palet').select('*').order('nomor_palet');
             
             if (data && data.length > 0) {
-                menu.innerHTML = data.map(p => `
-                    <label class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-0 transition">
+                menu.innerHTML = data.map(p => {
+                    // Tambahan visual aja biar tau itu palet lagi dipake (opsional)
+                    const statusBadge = p.status_palet === 'In Use' ? '<span class="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded ml-auto">In Use</span>' : '';
+                    
+                    return `
+                    <label class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-0 transition w-full">
                         <input type="checkbox" name="palet_pilihan" value="${p.nomor_palet}" onchange="updateSelectedPaletText()" class="w-4 h-4 text-dark-azure rounded border-gray-300">
                         <span class="text-sm font-medium text-gray-700">${p.nomor_palet}</span>
+                        ${statusBadge}
                     </label>
-                `).join('');
+                    `;
+                }).join('');
             } else {
-                menu.innerHTML = '<div class="px-4 py-3 text-sm text-gray-400 italic">Semua palet In Use</div>';
+                menu.innerHTML = '<div class="px-4 py-3 text-sm text-gray-400 italic">Belum ada data palet.</div>';
             }
+
+            // LOGIKA AUTO-SELECT: Kalau ada parameter palet baru, langsung centang kotaknya!
+            if (autoSelectPalet) {
+                const newCheckbox = document.querySelector(`input[name="palet_pilihan"][value="${autoSelectPalet}"]`);
+                if (newCheckbox) newCheckbox.checked = true;
+            }
+
             updateSelectedPaletText();
         }
 
@@ -778,20 +792,28 @@
 
         async function simpanPaletBaru(e) {
             e.preventDefault();
-            const num = document.getElementById('modal-num-palet').value.trim();
+            const noPalet = document.getElementById('modal-num-palet').value.trim();
             const jenis = document.getElementById('modal-jenis-palet').value;
 
-            const { error } = await _supabase.from('palet').insert([{ nomor_palet: num, jenis_palet: jenis, status_palet: 'Available' }]);
-            if(!error) {
-                alert('Palet berhasil dibuat!');
+            const { error } = await _supabase.from('palet').insert([{
+                nomor_palet: noPalet,
+                jenis_palet: jenis,
+                status_palet: 'Available'
+            }]);
+
+            if (!error) {
                 closeModalPalet();
+                document.getElementById('modal-num-palet').value = '';
                 
-                // Panggil ulang dropdown, tapi sekalian lempar nomor palet yang baru dibikin!
-                await loadDropdownPalet(num);
+                // Panggil fungsi load dengan melempar nomor palet baru agar otomatis tercentang
+                loadDropdownPalet(noPalet); 
                 
-                // (Bonus) Kosongkan inputan modal biar rapi pas mau bikin palet lagi nanti
-                document.getElementById('modal-num-palet').value = ''; 
-            } else alert('Gagal simpan palet: ' + error.message);
+                // Refresh tabel master palet (jika ada)
+                if (typeof renderTablePalet === "function") renderTablePalet(); 
+                
+            } else {
+                alert('Gagal menambah palet (Mungkin nomor sudah ada): ' + error.message);
+            }
         }
 
         async function simpanPenerimaan(e) {
