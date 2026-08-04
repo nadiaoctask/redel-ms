@@ -378,6 +378,7 @@
                                     <th class="p-4">Nomor Kendaraan</th>
                                     <th class="p-4">Jenis GR</th>
                                     <th class="p-4">ID Palet</th>
+                                    <th class="p-4">PIC</th>
                                     <th class="p-4">Status SKR</th>
                                     <th class="p-4 text-center">Aksi</th>
                                 </tr>
@@ -402,6 +403,7 @@
                                     <th class="p-4">Nama DelMan</th>
                                     <th class="p-4">Nomor Kendaraan</th>
                                     <th class="p-4">Tanggal Kirim</th>
+                                    <th class="p-4">PIC</th>
                                     <th class="p-4 text-center">Aksi</th>
                                 </tr>
                             </thead>
@@ -462,6 +464,7 @@
                                 <th class="p-4">Nomor Kendaraan</th>
                                 <th class="p-4">Jenis GR</th>
                                 <th class="p-4">Nomor Palet</th>
+                                <th class="p-4">PIC</th>
                                 <th class="p-4">Status SKR</th>
                             </tr>
                         </thead>
@@ -697,7 +700,7 @@
                                 <tr>
                                     <th class="p-4 w-12"></th><th class="p-4">No. Shipment</th><th class="p-4">Tgl Masuk</th>
                                     <th class="p-4">Nama Delman</th><th class="p-4">Nopol</th><th class="p-4">Jenis GR</th>
-                                    <th class="p-4">ID Palet</th><th class="p-4">Status SKR</th>
+                                    <th class="p-4">Nomor Palet</th><th class="p-4">PIC</th><th class="p-4">Status SKR</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100">
@@ -709,6 +712,7 @@
                                     <td class="p-4">${skrData.nopol_kendaraan && skrData.nopol_kendaraan !== 'null' ? skrData.nopol_kendaraan : '-'}</td>
                                     <td class="p-4">${skrData.jenis_gr}</td>
                                     <td class="p-4 font-medium">${palets}</td>
+                                    <td class="p-4">${skrData.PIC || '-'}</td>
                                     <td class="p-4"><span class="px-3 py-1 rounded-full text-[10px] md:text-xs font-bold ${badgeColor}">${skrData.status_skr}</span></td>
                                 </tr>
                                 <tr class="hidden bg-gray-50 border-b">
@@ -754,7 +758,7 @@
                             <thead class="bg-gray-50 text-gray-600 font-semibold border-b">
                                 <tr>
                                     <th class="p-4 w-12"></th><th class="p-4">No. Redel</th><th class="p-4">Nama DelMan</th>
-                                    <th class="p-4">Nomor kendaraan</th><th class="p-4">Tgl Kirim</th>
+                                    <th class="p-4">Nomor kendaraan</th><th class="p-4">Tgl Kirim</th><th class="p-4">PIC</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100">
@@ -764,6 +768,7 @@
                                     <td class="p-4">${redelData.nama_delman && redelData.nama_delman !== 'null' ? redelData.nama_delman : '-'}</td>
                                     <td class="p-4">${redelData.nopol_kendaraan && redelData.nopol_kendaraan !== 'null' ? redelData.nopol_kendaraan : '-'}</td>
                                     <td class="p-4 font-medium text-gray-700">${redelData.tanggal_pengiriman}</td>
+                                    <td class="p-4">${redelData.pic_redel || '-'}</td>
                                 </tr>
                                 <tr class="hidden bg-gray-50 border-b">
                                     <td colspan="5" class="p-4 text-xs">
@@ -1100,6 +1105,7 @@
                             <td class="p-4">${item.nopol_kendaraan && item.nopol_kendaraan !== 'null' ? item.nopol_kendaraan : '-'}</td>
                             <td class="p-4">${item.jenis_gr}</td>
                             <td class="p-4 font-medium">${palets}</td>
+                            <td class="p-4 text-gray-600 font-medium">${item.PIC || '-'}</td>
                             <td class="p-4"><span class="px-3 py-1 rounded-full text-[10px] md:text-xs font-bold ${badgeColor}">${item.isKritis ? 'Kritis' : item.status_skr}</span></td>
                             <td class="p-4 text-center space-x-2">
                                 <!-- TOMBOL MIGO -->
@@ -1152,6 +1158,7 @@
                         <td class="p-4">${item.nama_delman && item.nama_delman !== 'null' ? item.nama_delman : '-'}</td>
                         <td class="p-4">${item.nopol_kendaraan && item.nopol_kendaraan !== 'null' ? item.nopol_kendaraan : '-'}</td>
                         <td class="p-4 font-medium text-gray-700">${item.tanggal_pengiriman}</td>
+                        <td class="p-4 text-gray-600 font-medium">${item.pic_redel || '-'}</td>
                         <td class="p-4 text-center space-x-2">
                             <button onclick="bukaEditRedel('${item.no_shipment_redel}', '${item.tanggal_pengiriman}', '${item.nama_delman}', '${item.nopol_kendaraan}')" class="text-amber-500 hover:text-amber-600 font-bold" title="Edit Data"><i class="fa-solid fa-pen-to-square"></i></button>
                             <button onclick="hapusRedel('${item.no_shipment_redel}')" class="text-red-500 hover:text-red-700 font-bold" title="Hapus"><i class="fa-solid fa-trash"></i></button>
@@ -1403,6 +1410,7 @@
                         <td>${item.nopol_kendaraan && item.nopol_kendaraan !== 'null' ? item.nopol_kendaraan : '-'}</td>
                         <td>${item.jenis_gr}</td>
                         <td style="mso-number-format:'\\@';">${palets}</td>
+                        <td>${item.PIC || '-'}</td>
                         <td class="${statusClass}">${statusTampil}</td>
                     </tr>
                 `;
@@ -1432,6 +1440,7 @@
                                 <th>Nomor Kendaraan</th>
                                 <th>Jenis GR</th>
                                 <th>Nomor Palet</th>
+                                <th>PIC</th>
                                 <th>Status SKR</th>
                             </tr>
                         </thead>
@@ -1516,6 +1525,7 @@
                         <td class="p-4">${item.nopol_kendaraan && item.nopol_kendaraan !== 'null' ? item.nopol_kendaraan : '-'}</td>
                         <td class="p-4">${item.jenis_gr}</td>
                         <td class="p-4 font-medium">${palets}</td>
+                        <td class="p-4 text-gray-600 font-medium">${item.PIC || '-'}</td>
                         <td class="p-4"><span class="px-3 py-1 rounded-full text-[10px] md:text-xs font-bold ${badgeColor}">${isKritis ? 'Kritis (H+3)' : statusTampil}</span></td>
                     </tr>
                 `;
