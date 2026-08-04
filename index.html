@@ -58,14 +58,22 @@
     <div id="modal-ganti-pass" class="fixed inset-0 bg-black/40 flex items-center justify-center hidden z-50 p-4">
         <div class="bg-white rounded-2xl p-6 w-full max-w-sm">
             <h4 class="font-bold text-dark-azure mb-4 border-b pb-2">Ganti Password</h4>
-            <form onsubmit="prosesGantiPassword(event)" class="space-y-4">
-                <div><label class="block text-xs font-semibold mb-1">Password Lama</label><input type="password" id="pass-lama" required class="w-full px-4 py-2 rounded-xl border"></div>
-                <div><label class="block text-xs font-semibold mb-1">Password Baru</label><input type="password" id="pass-baru" required class="w-full px-4 py-2 rounded-xl border"></div>
-                <div class="flex gap-2 pt-2">
-                    <button type="button" onclick="document.getElementById('modal-ganti-pass').classList.add('hidden')" class="flex-1 bg-gray-100 py-2.5 rounded-xl font-semibold text-xs">Batal</button>
-                    <button type="submit" class="flex-1 bg-amber-500 text-white py-2.5 rounded-xl font-semibold text-xs">Simpan</button>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold mb-1">Password Lama</label>
+                    <input type="password" id="pass-lama" placeholder="Masukkan password lama" class="w-full px-4 py-2 rounded-xl border outline-none focus:border-dark-azure">
                 </div>
-            </form>
+                <div>
+                    <label class="block text-xs font-semibold mb-1">Password Baru</label>
+                    <input type="password" id="pass-baru" placeholder="Masukkan password baru" class="w-full px-4 py-2 rounded-xl border outline-none focus:border-dark-azure">
+                </div>
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="document.getElementById('modal-ganti-pass').classList.add('hidden')" class="flex-1 bg-gray-100 hover:bg-gray-200 py-2.5 rounded-xl font-semibold text-xs transition">Batal</button>
+                    
+                    <!-- Tombol diubah jadi type="button" dan memanggil onclick -->
+                    <button type="button" onclick="prosesGantiPassword()" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-2.5 rounded-xl font-semibold text-xs transition">Simpan</button>
+                </div>
+            </div>
         </div>
     </div>
     <!-- MOBILE HEADER (HANYA MUNCUL DI HP) -->
@@ -1590,36 +1598,44 @@
             }
         }
 
-        async function prosesGantiPassword(e) {
-            e.preventDefault();
-            const oldPass = document.getElementById('pass-lama').value.trim(); // Trim mencegah spasi salah ketik
+        async function prosesGantiPassword() {
+            const oldPass = document.getElementById('pass-lama').value.trim(); 
             const newPass = document.getElementById('pass-baru').value.trim();
             const currentUser = localStorage.getItem('gudang_pic');
 
+            if(!oldPass || !newPass) {
+                alert("Harap isi password lama dan password baru!");
+                return;
+            }
+
+            console.log("Mencari data untuk user:", currentUser);
+
             const { data, error } = await _supabase.from('Akun').select('password').eq('username', currentUser).single();
             
-            // Kita munculkan error spesifik kalau database menolak (biasanya karena RLS)
             if (error) {
-                alert('Gagal mengecek data ke database: ' + error.message + '\n(Cek apakah RLS di tabel Akun sudah dimatikan)');
+                alert('Sistem Gagal Mencari User:\n' + error.message);
                 console.error(error);
                 return;
             }
-            
-            if (data && data.password.trim() === oldPass) {
+
+            if (!data) {
+                alert('Username "' + currentUser + '" tidak ditemukan di database Akun!');
+                return;
+            }
+
+            if (data.password === oldPass) {
                 const { error: updateErr } = await _supabase.from('Akun').update({ password: newPass }).eq('username', currentUser);
                 
                 if (!updateErr) {
                     alert('Password berhasil diganti!');
                     document.getElementById('modal-ganti-pass').classList.add('hidden');
-                    
-                    // Kosongkan isian setelah sukses
                     document.getElementById('pass-lama').value = '';
                     document.getElementById('pass-baru').value = '';
                 } else {
                     alert('Gagal menyimpan password baru: ' + updateErr.message);
                 }
             } else {
-                alert('Password lama salah!');
+                alert(`Password lama salah!\n\nYang kamu ketik: "${oldPass}"\nYang ada di Database: "${data.password}"`);
             }
         }
 
