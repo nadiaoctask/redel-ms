@@ -307,6 +307,8 @@
                             <option value="">Semua Status</option>
                             <option value="Menunggu shipment baru">Menunggu Shipment Redel</option>
                             <option value="Parsial">Parsial</option>
+                            <option value="Kritis">Kritis</option>
+                            <option value="Expired">Expired (LT0G)</option>
                             <option value="Selesai">Selesai</option>
                         </select>
                     </div>
@@ -978,31 +980,69 @@
             const statusVal = document.getElementById('filter-status').value;
             let { data } = await _supabase.from('skr_redel').select('*, penempatan(nomor_palet), detail_redel(*)');
             
-            if(data) {
+                if(data) {
+                let expiredIds = [];
+                const hariIni = new Date();
+                hariIni.setHours(0,0,0,0);
+
+                data = data.map(s => {
+                    if (s.status_skr === 'Menunggu shipment baru') {
+                        const tglMasuk = new Date(s.tanggal_penerimaan);
+                        tglMasuk.setHours(0,0,0,0);
+                        const bedaHari = Math.floor((hariIni - tglMasuk) / (1000 * 60 * 60 * 24));
+                        
+                        if (bedaHari >= 4) {
+                            s.status_skr = 'Expired';
+                            expiredIds.push(s.no_shipment);
+                        } else if (bedaHari === 3) {
+                            s.isKritis = true;
+                        }
+                    }
+                    return s;
+                });
+
+                if (expiredIds.length > 0) {
+                    _supabase.from('skr_redel').update({ status_skr: 'Expired' }).in('no_shipment', expiredIds).then();
+                }
+
                 if(searchVal) data = data.filter(s => s.no_shipment.toLowerCase().includes(searchVal) || (s.nama_delman && s.nama_delman.toLowerCase().includes(searchVal)) || (s.tanggal_penerimaan && s.tanggal_penerimaan.includes(searchVal)));
                 if(grVal) data = data.filter(s => s.jenis_gr === grVal);
-                if(statusVal) data = data.filter(s => s.status_skr === statusVal);
+                
+                if(statusVal) {
+                    if (statusVal === 'Kritis') data = data.filter(s => s.isKritis);
+                    else data = data.filter(s => s.status_skr === statusVal);
+                }
 
                 tbody.innerHTML = data.map(item => {
                     const palets = item.penempatan && item.penempatan.length > 0 ? item.penempatan.map(p => p.nomor_palet).join(', ') : '-';
-                    const badgeColor = item.status_skr === 'Selesai' ? 'bg-emerald-100 text-emerald-800' : item.status_skr === 'Parsial' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800';
-                    const isDeletable = item.status_skr === 'Menunggu shipment baru';
+                    
+                    let badgeColor = 'bg-blue-100 text-blue-800'; // Default Menunggu
+                    if (item.status_skr === 'Selesai') badgeColor = 'bg-emerald-100 text-emerald-800';
+                    else if (item.status_skr === 'Parsial') badgeColor = 'bg-amber-100 text-amber-800';
+                    else if (item.status_skr === 'Expired') badgeColor = 'bg-gray-800 text-white';
+                    else if (item.isKritis) badgeColor = 'bg-red-600 text-white animate-pulse shadow-md'; // Nyala Merah Kedip!
+
+                    const rowStyle = item.isKritis ? 'bg-red-50 hover:bg-red-100 border-l-4 border-red-500' : (item.status_skr === 'Expired' ? 'bg-gray-50 opacity-75' : 'hover:bg-gray-50');
+
+                    const isDeletable = item.status_skr === 'Menunggu shipment baru' || item.status_skr === 'Expired';
+                    const showMigo = item.status_skr === 'Menunggu shipment baru' || item.status_skr === 'Expired';
                     
                     return `
-                        <tr class="whitespace-nowrap hover:bg-gray-50 transition">
+                        <tr class="whitespace-nowrap transition ${rowStyle}">
                             <td class="p-4"><button onclick="this.parentElement.parentElement.nextElementSibling.classList.toggle('hidden')" class="text-dark-azure hover:text-azure-hover font-bold"><i class="fa-solid fa-chevron-down"></i></button></td>
                             <td class="p-4 font-bold text-dark-azure">${item.no_shipment}</td>
-                            <td class="p-4 font-medium text-gray-700">${item.tanggal_penerimaan}</td>
-                            <td class="p-4">${item.nama_delman || '-'}</td>
-                            <td class="p-4">${item.nopol_kendaraan || '-'}</td>
+                            <td class="p-4 font-medium ${item.isKritis ? 'text-red-600 font-bold' : 'text-gray-700'}">${item.tanggal_penerimaan}</td>
+                            <td class="p-4">${item.nama_delman && item.nama_delman !== 'null' ? item.nama_delman : '-'}</td>
+                            <td class="p-4">${item.nopol_kendaraan && item.nopol_kendaraan !== 'null' ? item.nopol_kendaraan : '-'}</td>
                             <td class="p-4">${item.jenis_gr}</td>
                             <td class="p-4 font-medium">${palets}</td>
-                            <td class="p-4"><span class="px-3 py-1 rounded-full text-[10px] md:text-xs font-bold ${badgeColor}">${item.status_skr}</span></td>
+                            <td class="p-4"><span class="px-3 py-1 rounded-full text-[10px] md:text-xs font-bold ${badgeColor}">${item.isKritis ? 'Kritis' : item.status_skr}</span></td>
                             <td class="p-4 text-center space-x-2">
-                                <!-- INI DIA TOMBOL EDITNYA YANG SUDAH LENGKAP -->
-                                <button onclick="bukaEditSKR('${item.no_shipment}', '${item.tanggal_penerimaan}', '${item.nama_delman}', '${item.nopol_kendaraan}', '${item.jenis_gr}', '${palets}')" class="text-amber-500 hover:text-amber-600 font-bold" title="Edit Data"><i class="fa-solid fa-pen-to-square"></i></button>
+                                <!-- TOMBOL MIGO -->
+                                ${showMigo ? `<button onclick="prosesMigo('${item.no_shipment}')" class="text-emerald-600 hover:text-emerald-800 font-bold" title="Proses MIGO"><i class="fa-solid fa-check-double"></i></button>` : ''}
                                 
-                                ${isDeletable ? `<button onclick="hapusSKR('${item.no_shipment}')" class="text-red-500 hover:text-red-700 font-bold" title="Hapus"><i class="fa-solid fa-trash"></i></button>` : `<i class="fa-solid fa-lock text-gray-300" title="Terkunci (Sudah ada Redelivery)"></i>`}
+                                <button onclick="bukaEditSKR('${item.no_shipment}', '${item.tanggal_penerimaan}', '${item.nama_delman}', '${item.nopol_kendaraan}', '${item.jenis_gr}', '${palets}')" class="text-amber-500 hover:text-amber-600 font-bold" title="Edit Data"><i class="fa-solid fa-pen-to-square"></i></button>
+                                ${isDeletable ? `<button onclick="hapusSKR('${item.no_shipment}')" class="text-red-500 hover:text-red-700 font-bold" title="Hapus"><i class="fa-solid fa-trash"></i></button>` : `<i class="fa-solid fa-lock text-gray-300" title="Terkunci"></i>`}
                             </td>
                         </tr>
                         <tr class="hidden bg-gray-50 border-b">
@@ -1012,20 +1052,10 @@
                                     <div class="border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm">
                                         <table class="w-full text-left border-collapse">
                                             <thead class="bg-gray-100 text-gray-600 font-semibold border-b border-gray-200">
-                                                <tr>
-                                                    <th class="py-2 px-3">No. Shipment</th>
-                                                    <th class="py-2 px-3">Jenis Redel</th>
-                                                    <th class="py-2 px-3">Status Final</th>
-                                                </tr>
+                                                <tr><th class="py-2 px-3">No. Redel</th><th class="py-2 px-3">Jenis Redel</th><th class="py-2 px-3">Status Final</th></tr>
                                             </thead>
                                             <tbody class="divide-y divide-gray-100">
-                                                ${item.detail_redel.map(d => `
-                                                    <tr class="hover:bg-gray-50">
-                                                        <td class="py-2 px-3 font-bold text-dark-azure">${d.no_shipment_redel}</td>
-                                                        <td class="py-2 px-3">${d.jenis_redel}</td>
-                                                        <td class="py-2 px-3">${d.is_final_delivery ? '<span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-bold text-[10px]">✅ Selesai</span>' : '<span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-bold text-[10px]">❌ Parsial</span>'}</td>
-                                                    </tr>
-                                                `).join('')}
+                                                ${item.detail_redel.map(d => `<tr class="hover:bg-gray-50"><td class="py-2 px-3 font-bold text-dark-azure">${d.no_shipment_redel}</td><td class="py-2 px-3">${d.jenis_redel}</td><td class="py-2 px-3">${d.is_final_delivery ? '<span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-bold text-[10px]">✅ Selesai</span>' : '<span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-bold text-[10px]">❌ Parsial</span>'}</td></tr>`).join('')}
                                             </tbody>
                                         </table>
                                     </div>
@@ -1101,6 +1131,24 @@
             }
         }
 
+        async function prosesMigo(noShipment) {
+            if (confirm(`Apakah Anda yakin ingin melakukan proses MIGO pada Shipment ${noShipment}?\n\nStatus akan langsung diubah menjadi "Selesai" (Cleared).`)) {
+                
+                const { error } = await _supabase
+                    .from('skr_redel')
+                    .update({ status_skr: 'Selesai' })
+                    .eq('no_shipment', noShipment);
+                
+                if (!error) {
+                    renderTableInbound();
+                    // (Opsional) Jika kamu mau paletnya dilepas saat di-MIGO, 
+                    // kamu bisa tambahkan logika hapus dari tabel penempatan di sini
+                } else {
+                    alert('Gagal proses MIGO: ' + error.message);
+                }
+            }
+        }
+        
         async function hapusRedel(noRedel) {
             if(confirm(`Yakin hapus transaksi Redelivery ${noRedel}?`)) {
                 await _supabase.from('redelivery').delete().eq('no_shipment_redel', noRedel);
