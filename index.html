@@ -22,7 +22,51 @@
     </script>
 </head>
 <body class="bg-bg-gray font-sans h-screen flex flex-col md:flex-row overflow-hidden">
+    <div id="screen-auth" class="fixed inset-0 bg-slate-900 z-[100] flex items-center justify-center hidden">
+        
+        <!-- KOTAK LOGIN -->
+        <div id="box-login" class="bg-white p-8 rounded-3xl w-full max-w-sm shadow-2xl transition">
+            <div class="text-center mb-8">
+                <i class="fa-solid fa-boxes-stacked text-4xl text-dark-azure mb-3"></i>
+                <h2 class="text-2xl font-bold text-gray-800">Login Gudang</h2>
+            </div>
+            <form onsubmit="prosesLogin(event)" class="space-y-4">
+                <div><label class="block text-sm font-semibold mb-1">Username</label><input type="text" id="log-username" required class="w-full px-4 py-3 bg-gray-50 border rounded-xl focus:border-dark-azure outline-none"></div>
+                <div><label class="block text-sm font-semibold mb-1">Password</label><input type="password" id="log-pass" required class="w-full px-4 py-3 bg-gray-50 border rounded-xl focus:border-dark-azure outline-none"></div>
+                <button type="submit" class="w-full bg-dark-azure text-white font-bold py-3.5 rounded-xl shadow-lg mt-4">Masuk</button>
+            </form>
+            <div class="mt-6 text-center text-sm text-gray-500">Belum punya akun? <button onclick="toggleAuth('register')" class="text-dark-azure font-bold hover:underline">Daftar</button></div>
+        </div>
 
+        <!-- KOTAK REGISTER -->
+        <div id="box-register" class="bg-white p-8 rounded-3xl w-full max-w-sm shadow-2xl hidden transition">
+            <div class="text-center mb-8">
+                <i class="fa-solid fa-user-plus text-4xl text-emerald-600 mb-3"></i>
+                <h2 class="text-2xl font-bold text-gray-800">Buat Akun</h2>
+            </div>
+            <form onsubmit="prosesRegister(event)" class="space-y-4">
+                <div><label class="block text-sm font-semibold mb-1">Username Baru</label><input type="text" id="reg-username" required class="w-full px-4 py-3 bg-gray-50 border rounded-xl focus:border-emerald-500 outline-none"></div>
+                <div><label class="block text-sm font-semibold mb-1">Password Baru</label><input type="password" id="reg-pass" required class="w-full px-4 py-3 bg-gray-50 border rounded-xl focus:border-emerald-500 outline-none"></div>
+                <button type="submit" class="w-full bg-emerald-600 text-white font-bold py-3.5 rounded-xl shadow-lg mt-4">Daftar Akun</button>
+            </form>
+            <div class="mt-6 text-center text-sm text-gray-500">Sudah punya akun? <button onclick="toggleAuth('login')" class="text-emerald-600 font-bold hover:underline">Login</button></div>
+        </div>
+    </div>
+
+    <!-- MODAL GANTI PASSWORD -->
+    <div id="modal-ganti-pass" class="fixed inset-0 bg-black/40 flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm">
+            <h4 class="font-bold text-dark-azure mb-4 border-b pb-2">Ganti Password</h4>
+            <form onsubmit="prosesGantiPassword(event)" class="space-y-4">
+                <div><label class="block text-xs font-semibold mb-1">Password Lama</label><input type="password" id="pass-lama" required class="w-full px-4 py-2 rounded-xl border"></div>
+                <div><label class="block text-xs font-semibold mb-1">Password Baru</label><input type="password" id="pass-baru" required class="w-full px-4 py-2 rounded-xl border"></div>
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="document.getElementById('modal-ganti-pass').classList.add('hidden')" class="flex-1 bg-gray-100 py-2.5 rounded-xl font-semibold text-xs">Batal</button>
+                    <button type="submit" class="flex-1 bg-amber-500 text-white py-2.5 rounded-xl font-semibold text-xs">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
     <!-- MOBILE HEADER (HANYA MUNCUL DI HP) -->
     <div class="md:hidden bg-white border-b border-gray-200 p-4 flex justify-between items-center z-20 shadow-sm">
         <div class="flex items-center gap-3">
@@ -84,23 +128,23 @@
             </nav>
         </div>
 
-        <button onclick="alert('Logout Berhasil')" class="flex items-center gap-3 px-4 py-2 text-gray-600 hover:bg-red-50 hover:text-red-600 rounded-xl font-medium text-sm transition w-full mt-4">
+        <button onclick="prosesLogout()" class="flex items-center gap-3 px-4 py-2 text-gray-600 hover:bg-red-50 hover:text-red-600 rounded-xl font-medium text-sm transition w-full mt-4">
             <i class="fa-solid fa-right-from-bracket w-5"></i> Logout
         </button>
     </aside>
 
     <!-- MAIN CONTENT -->
     <div class="flex-1 flex flex-col h-full overflow-y-auto w-full">
-        
-        <!-- DESKTOP TOPBAR HEADER -->
         <header class="hidden md:flex bg-white px-8 py-4 border-b border-gray-200 justify-between items-center sticky top-0 z-10 shadow-sm">
             <h2 id="page-title" class="text-xl font-bold text-dark-azure">Redelivery Management System</h2>
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-3 relative cursor-pointer" onclick="document.getElementById('menu-user').classList.toggle('hidden')">
                 <div class="text-right">
-                    <p class="font-bold text-gray-800 text-sm leading-none">Suliadi</p>
-                    <p class="text-xs text-gray-500 font-medium">Supervisor</p>
+                    <p class="font-bold text-gray-800 text-sm leading-none">Halo, <span id="user-display">Suliadi</span></p>
                 </div>
                 <i class="fa-solid fa-circle-user text-3xl text-dark-azure"></i>
+                <div id="menu-user" class="hidden absolute right-0 top-12 w-48 bg-white border border-gray-100 rounded-xl shadow-lg z-50 overflow-hidden">
+                    <button onclick="document.getElementById('modal-ganti-pass').classList.remove('hidden')" class="w-full text-left px-4 py-3 text-sm hover:bg-gray-50 text-gray-700 font-medium"><i class="fa-solid fa-key mr-2"></i>Ganti Password</button>
+                </div>
             </div>
         </header>
 
@@ -838,10 +882,8 @@
             const delman = document.getElementById('in-nama-delman').value;
             const nopol = document.getElementById('in-nopol').value;
             const tgl = document.getElementById('in-tgl').value;
-            
-            // Ambil array palet yang dicentang (Multi Select)
             const selectedPalets = Array.from(document.querySelectorAll('input[name="palet_pilihan"]:checked')).map(cb => cb.value);
-
+            const picName = localStorage.getItem('gudang_pic') || 'Sistem';
             // 1. Simpan ke skr_redel
             const { error: errSkr } = await _supabase.from('skr_redel').insert([{
                 no_shipment: noShipment,
@@ -849,7 +891,8 @@
                 nama_delman: delman,
                 nopol_kendaraan: nopol,
                 tanggal_penerimaan: tgl,
-                status_skr: 'Menunggu shipment baru'
+                status_skr: 'Menunggu shipment baru',
+                PIC: picName
             }]);
 
             if (errSkr) {
@@ -947,9 +990,10 @@
             const noRedel = document.getElementById('redel-no-shipment').value.trim();
             const namaDelman = document.getElementById('redel-nama-delman').value;
             const nopol = document.getElementById('redel-nopol').value;
+            const picName = localStorage.getItem('gudang_pic') || 'Sistem';
 
             const { error } = await _supabase.from('redelivery').insert([{
-                no_shipment_redel: noRedel, nama_delman: namaDelman, nopol_kendaraan: nopol, tanggal_pengiriman: todayStr
+                no_shipment_redel: noRedel, nama_delman: namaDelman, nopol_kendaraan: nopol, tanggal_pengiriman: todayStr, pic_redel: picName
             }]);
 
             if(!error) {
@@ -1485,6 +1529,82 @@
         }
 
         fetchMetrics();
+
+        function cekLogin() {
+            const pic = localStorage.getItem('gudang_pic');
+            if (!pic) {
+                document.getElementById('screen-auth').classList.remove('hidden');
+            } else {
+                document.getElementById('screen-auth').classList.add('hidden');
+                if(document.getElementById('user-display')) document.getElementById('user-display').textContent = pic;
+            }
+        }
+
+        function toggleAuth(type) {
+            if(type === 'register') {
+                document.getElementById('box-login').classList.add('hidden');
+                document.getElementById('box-register').classList.remove('hidden');
+            } else {
+                document.getElementById('box-register').classList.add('hidden');
+                document.getElementById('box-login').classList.remove('hidden');
+            }
+        }
+
+        async function prosesLogin(e) {
+            e.preventDefault();
+            const user = document.getElementById('log-username').value.trim(); 
+            const pass = document.getElementById('log-pass').value;
+
+            // Menggunakan tabel 'Akun' kapital
+            const { data } = await _supabase.from('Akun').select('*').eq('username', user).eq('password', pass).single();
+            if (data) {
+                localStorage.setItem('gudang_pic', data.username);
+                cekLogin();
+            } else {
+                alert('Username atau Password salah!');
+            }
+        }
+
+        async function prosesRegister(e) {
+            e.preventDefault();
+            const user = document.getElementById('reg-username').value.trim();
+            const pass = document.getElementById('reg-pass').value;
+
+            const { data: check } = await _supabase.from('Akun').select('username').eq('username', user).single();
+            if (check) return alert('Username sudah dipakai!');
+
+            const { error } = await _supabase.from('Akun').insert([{ username: user, password: pass }]);
+            if (!error) {
+                localStorage.setItem('gudang_pic', user);
+                cekLogin();
+            } else alert('Gagal daftar: ' + error.message);
+        }
+
+        async function prosesGantiPassword(e) {
+            e.preventDefault();
+            const oldPass = document.getElementById('pass-lama').value;
+            const newPass = document.getElementById('pass-baru').value;
+            const currentUser = localStorage.getItem('gudang_pic');
+
+            const { data } = await _supabase.from('Akun').select('password').eq('username', currentUser).single();
+            
+            if (data && data.password === oldPass) {
+                await _supabase.from('Akun').update({ password: newPass }).eq('username', currentUser);
+                alert('Password berhasil diganti!');
+                document.getElementById('modal-ganti-pass').classList.add('hidden');
+            } else {
+                alert('Password lama salah!');
+            }
+        }
+
+        function prosesLogout() {
+            if(confirm('Yakin ingin keluar?')) {
+                localStorage.removeItem('gudang_pic');
+                window.location.reload();
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => cekLogin());
     </script>
 </body>
 </html>
