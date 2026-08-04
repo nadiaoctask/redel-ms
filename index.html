@@ -27,8 +27,8 @@
         <!-- KOTAK LOGIN -->
         <div id="box-login" class="bg-white p-8 rounded-3xl w-full max-w-sm shadow-2xl transition">
             <div class="text-center mb-8">
-                <i class="fa-solid fa-boxes-stacked text-4xl text-dark-azure mb-3"></i>
-                <h2 class="text-2xl font-bold text-gray-800">Login Gudang</h2>
+                <img src="https://rmlxzhhsvcgadzcjpyxm.supabase.co/storage/v1/object/public/assets/Screenshot_2026-07-01_003538-removebg-preview.png" alt="Wings Logo" class="w-24 md:w-28">
+                <h2 class="text-2xl font-bold text-gray-800">Login Redelivery Management System</h2>
             </div>
             <form onsubmit="prosesLogin(event)" class="space-y-4">
                 <div><label class="block text-sm font-semibold mb-1">Username</label><input type="text" id="log-username" required class="w-full px-4 py-3 bg-gray-50 border rounded-xl focus:border-dark-azure outline-none"></div>
@@ -1568,30 +1568,55 @@
         async function prosesRegister(e) {
             e.preventDefault();
             const user = document.getElementById('reg-username').value.trim();
-            const pass = document.getElementById('reg-pass').value;
+            const pass = document.getElementById('reg-pass').value.trim(); // Tambah trim agar tidak ada spasi tak sengaja
 
-            const { data: check } = await _supabase.from('Akun').select('username').eq('username', user).single();
-            if (check) return alert('Username sudah dipakai!');
+            // Pakai maybeSingle() lebih aman kalau datanya kosong
+            const { data: check } = await _supabase.from('Akun').select('username').eq('username', user).maybeSingle();
+            if (check) return alert('Username sudah dipakai! Silakan cari username lain.');
 
             const { error } = await _supabase.from('Akun').insert([{ username: user, password: pass }]);
             if (!error) {
-                localStorage.setItem('gudang_pic', user);
-                cekLogin();
-            } else alert('Gagal daftar: ' + error.message);
+                alert('Akun berhasil dibuat! Silakan coba login dengan username dan password Anda.');
+                
+                // Kosongkan form daftar
+                document.getElementById('reg-username').value = '';
+                document.getElementById('reg-pass').value = '';
+                
+                // Arahkan kembali ke layar Login (TIDAK OTOMATIS MASUK)
+                toggleAuth('login');
+            } else {
+                alert('Gagal daftar: ' + error.message);
+            }
         }
 
         async function prosesGantiPassword(e) {
             e.preventDefault();
-            const oldPass = document.getElementById('pass-lama').value;
-            const newPass = document.getElementById('pass-baru').value;
+            const oldPass = document.getElementById('pass-lama').value.trim(); // Trim mencegah spasi salah ketik
+            const newPass = document.getElementById('pass-baru').value.trim();
             const currentUser = localStorage.getItem('gudang_pic');
 
-            const { data } = await _supabase.from('Akun').select('password').eq('username', currentUser).single();
+            const { data, error } = await _supabase.from('Akun').select('password').eq('username', currentUser).single();
             
-            if (data && data.password === oldPass) {
-                await _supabase.from('Akun').update({ password: newPass }).eq('username', currentUser);
-                alert('Password berhasil diganti!');
-                document.getElementById('modal-ganti-pass').classList.add('hidden');
+            // Kita munculkan error spesifik kalau database menolak (biasanya karena RLS)
+            if (error) {
+                alert('Gagal mengecek data ke database: ' + error.message + '\n(Cek apakah RLS di tabel Akun sudah dimatikan)');
+                console.error(error);
+                return;
+            }
+            
+            if (data && data.password.trim() === oldPass) {
+                const { error: updateErr } = await _supabase.from('Akun').update({ password: newPass }).eq('username', currentUser);
+                
+                if (!updateErr) {
+                    alert('Password berhasil diganti!');
+                    document.getElementById('modal-ganti-pass').classList.add('hidden');
+                    
+                    // Kosongkan isian setelah sukses
+                    document.getElementById('pass-lama').value = '';
+                    document.getElementById('pass-baru').value = '';
+                } else {
+                    alert('Gagal menyimpan password baru: ' + updateErr.message);
+                }
             } else {
                 alert('Password lama salah!');
             }
