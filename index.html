@@ -400,19 +400,20 @@
 
                 <!-- Table Preview Section -->
                 <div class="bg-white rounded-2xl border border-gray-100 overflow-x-auto shadow-sm">
-                    <table class="w-full text-left border-collapse text-xs md:text-sm min-w-[800px]">
+                    <table class="w-full text-left border-collapse text-xs md:text-sm min-w-[1000px]">
                         <thead class="bg-gray-50 text-gray-600 font-semibold border-b">
                             <tr>
-                                <th class="p-4">Tgl Redelivery</th>
-                                <th class="p-4">No. Redel</th>
-                                <th class="p-4">Delman & Nopol</th>
-                                <th class="p-4">No. SKR</th>
-                                <th class="p-4">Jenis Redel</th>
-                                <th class="p-4">Status Final</th>
+                                <th class="p-4">Tgl Masuk</th>
+                                <th class="p-4">No. Shipment</th>
+                                <th class="p-4">Nama DelMan</th>
+                                <th class="p-4">Nomor Kendaraan</th>
+                                <th class="p-4">Jenis GR</th>
+                                <th class="p-4">Nomor Palet</th>
+                                <th class="p-4">Status SKR</th>
                             </tr>
                         </thead>
                         <tbody id="tbody-laporan" class="divide-y divide-gray-100">
-                            <tr><td colspan="6" class="p-6 text-center text-gray-500 font-medium">Pilih rentang tanggal dan klik "Tampilkan Data"</td></tr>
+                            <tr><td colspan="7" class="p-6 text-center text-gray-500 font-medium">Pilih rentang tanggal dan klik "Tampilkan Data"</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1318,133 +1319,171 @@
             }
         }
 
-                // ==========================================
-    // LOGIKA LAPORAN REKAP EXCEL (SHEETJS)
-    // ==========================================
+        function generateExcelStyled(data, filename) {
+            const hariIni = new Date();
+            hariIni.setHours(0,0,0,0);
+            let rowsHTML = '';
 
-    // Helper: Format tanggal jadi "31 Juli 2026"
-        function formatTanggalIndo(dateStr) {
-            if(!dateStr) return "";
-            const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-            const d = new Date(dateStr);
-            return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
-        }
-
-        // Mengambil dan meratakan (flatten) data dari Supabase
-        async function fetchLaporanData(startDate, endDate) {
-            const { data, error } = await _supabase
-                .from('redelivery')
-                .select('*, detail_redel(*)')
-                .gte('tanggal_pengiriman', startDate)
-                .lte('tanggal_pengiriman', endDate)
-                .order('tanggal_pengiriman', { ascending: true });
-            
-            if(error) {
-                alert("Gagal mengambil data laporan: " + error.message);
-                return [];
-            }
-            
-            let rows = [];
-            data.forEach(redel => {
-                if(redel.detail_redel && redel.detail_redel.length > 0) {
-                    redel.detail_redel.forEach(detail => {
-                        rows.push({
-                            "Tgl Redelivery": redel.tanggal_pengiriman,
-                            "No Redelivery": redel.no_shipment_redel,
-                            "Nama Delman": redel.nama_delman,
-                            "Nopol Kendaraan": redel.nopol_kendaraan,
-                            "No SKR": detail.no_shipment,
-                            "Jenis Redelivery": detail.jenis_redel,
-                            "Status Pengiriman": detail.is_final_delivery ? "Selesai" : "Parsial"
-                        });
-                    });
-                } else {
-                    rows.push({
-                        "Tgl Redelivery": redel.tanggal_pengiriman,
-                        "No Redelivery": redel.no_shipment_redel,
-                        "Nama Delman": redel.nama_delman,
-                        "Nopol Kendaraan": redel.nopol_kendaraan,
-                        "No SKR": "-",
-                        "Jenis Redelivery": "-",
-                        "Status Pengiriman": "-"
-                    });
+            data.forEach(item => {
+                const palets = item.penempatan && item.penempatan.length > 0 ? item.penempatan.map(p => p.nomor_palet).join(', ') : '-';
+                
+                let statusTampil = item.status_skr;
+                let statusClass = 'status-menunggu'; // default class css
+                
+                if (item.status_skr === 'Menunggu shipment baru') {
+                    const tglMasuk = new Date(item.tanggal_penerimaan);
+                    tglMasuk.setHours(0,0,0,0);
+                    const bedaHari = Math.floor((hariIni - tglMasuk) / (1000 * 60 * 60 * 24));
+                    if (bedaHari >= 4) { statusTampil = 'Expired'; statusClass = 'status-expired'; }
+                    else if (bedaHari === 3) { statusTampil = 'Kritis (H+3)'; statusClass = 'status-kritis'; }
+                } else if (item.status_skr === 'Selesai') {
+                    statusClass = 'status-selesai';
+                } else if (item.status_skr === 'Parsial') {
+                    statusClass = 'status-parsial';
                 }
+
+                rowsHTML += `
+                    <tr>
+                        <td>${item.tanggal_penerimaan}</td>
+                        <td style="mso-number-format:'\\@';">${item.no_shipment}</td>
+                        <td>${item.nama_delman && item.nama_delman !== 'null' ? item.nama_delman : '-'}</td>
+                        <td>${item.nopol_kendaraan && item.nopol_kendaraan !== 'null' ? item.nopol_kendaraan : '-'}</td>
+                        <td>${item.jenis_gr}</td>
+                        <td style="mso-number-format:'\\@';">${palets}</td>
+                        <td class="${statusClass}">${statusTampil}</td>
+                    </tr>
+                `;
             });
-            return rows;
+
+            const template = `
+                <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+                <head>
+                    <meta charset="utf-8">
+                    <style>
+                        th { background-color: #0f4c81; color: #ffffff; font-weight: bold; border: 1px solid #000000; padding: 10px; text-align: center; }
+                        td { border: 1px solid #dddddd; padding: 8px; vertical-align: middle; }
+                        .status-selesai { background-color: #d1fae5; color: #065f46; font-weight: bold; text-align: center; }
+                        .status-parsial { background-color: #fef3c7; color: #92400e; font-weight: bold; text-align: center; }
+                        .status-expired { background-color: #1f2937; color: #ffffff; font-weight: bold; text-align: center; }
+                        .status-kritis { background-color: #fee2e2; color: #b91c1c; font-weight: bold; text-align: center; }
+                        .status-menunggu { background-color: #dbeafe; color: #1e40af; font-weight: bold; text-align: center; }
+                    </style>
+                </head>
+                <body>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tanggal Masuk</th>
+                                <th>No. Shipment</th>
+                                <th>Nama DelMan</th>
+                                <th>Nomor Kendaraan</th>
+                                <th>Jenis GR</th>
+                                <th>Nomor Palet</th>
+                                <th>Status SKR</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rowsHTML}</tbody>
+                    </table>
+                </body>
+                </html>
+            `;
+
+            const blob = new Blob([template], { type: 'application/vnd.ms-excel' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename + '.xls';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
-        // A. Fungsi Tombol Dashboard (Download Rekap Hari Ini)
         async function downloadLaporanHariIni() {
-            const today = todayStr; // diambil dari var todayStr yg udah ada di atas
-            const dataToExport = await fetchLaporanData(today, today);
+            const tglHariIni = new Date().toISOString().split('T')[0];
+            const { data } = await _supabase.from('skr_redel').select('*, penempatan(nomor_palet)').eq('tanggal_penerimaan', tglHariIni);
             
-            if(dataToExport.length === 0) {
-                alert("Tidak ada transaksi redelivery pada hari ini.");
-                return;
+            if (data && data.length > 0) {
+                generateExcelStyled(data, `Laporan_Harian_SKR_${tglHariIni}`);
+            } else {
+                alert('Tidak ada data SKR yang masuk pada hari ini.');
             }
-
-            const ws = XLSX.utils.json_to_sheet(dataToExport);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Rekap Hari Ini");
-            
-            const fileName = `Rekap redel - ${formatTanggalIndo(today)}.xlsx`;
-            XLSX.writeFile(wb, fileName);
         }
-
-        // B. Fungsi Halaman Laporan (Filter & Export)
-        let dataLaporanKustom = [];
 
         async function tampilkanLaporan() {
             const start = document.getElementById('filter-start-date').value;
             const end = document.getElementById('filter-end-date').value;
-            
-            if(!start || !end) {
-                alert("Harap pilih dari dan sampai tanggal!");
-                return;
-            }
-
-            dataLaporanKustom = await fetchLaporanData(start, end);
             const tbody = document.getElementById('tbody-laporan');
-            
-            if(dataLaporanKustom.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-gray-500 font-medium">Tidak ada data pengiriman di rentang tanggal tersebut.</td></tr>`;
+
+            if (!start || !end) {
+                alert('Pilih tanggal awal dan akhir terlebih dahulu!');
                 return;
             }
 
-            tbody.innerHTML = dataLaporanKustom.map(r => `
-                <tr class="whitespace-nowrap hover:bg-gray-50 transition">
-                    <td class="p-4 font-medium text-gray-700">${r["Tgl Redelivery"]}</td>
-                    <td class="p-4 font-bold text-dark-azure">${r["No Redelivery"]}</td>
-                    <td class="p-4">${r["Nama Delman"]} <br> <span class="text-xs text-gray-500">${r["Nopol Kendaraan"]}</span></td>
-                    <td class="p-4 font-medium">${r["No SKR"]}</td>
-                    <td class="p-4">${r["Jenis Redelivery"]}</td>
-                    <td class="p-4"><span class="px-2 py-1 rounded text-[10px] md:text-xs font-bold ${r["Status Pengiriman"] === 'Selesai' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${r["Status Pengiriman"]}</span></td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-gray-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Memuat data...</td></tr>';
+
+            const { data, error } = await _supabase
+                .from('skr_redel')
+                .select('*, penempatan(nomor_palet)')
+                .gte('tanggal_penerimaan', start)
+                .lte('tanggal_penerimaan', end)
+                .order('tanggal_penerimaan', { ascending: false });
+
+            if (error || !data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-red-500">Tidak ada data di rentang tanggal tersebut.</td></tr>';
+                return;
+            }
+
+            const hariIni = new Date();
+            hariIni.setHours(0,0,0,0);
+
+            tbody.innerHTML = data.map(item => {
+                const palets = item.penempatan && item.penempatan.length > 0 ? item.penempatan.map(p => p.nomor_palet).join(', ') : '-';
+                
+                let statusTampil = item.status_skr;
+                let isKritis = false;
+                
+                if (item.status_skr === 'Menunggu shipment baru') {
+                    const tglMasuk = new Date(item.tanggal_penerimaan);
+                    tglMasuk.setHours(0,0,0,0);
+                    const bedaHari = Math.floor((hariIni - tglMasuk) / (1000 * 60 * 60 * 24));
+                    if (bedaHari >= 4) statusTampil = 'Expired';
+                    else if (bedaHari === 3) isKritis = true;
+                }
+
+                let badgeColor = 'bg-blue-100 text-blue-800'; 
+                if (statusTampil === 'Selesai') badgeColor = 'bg-emerald-100 text-emerald-800';
+                else if (statusTampil === 'Parsial') badgeColor = 'bg-amber-100 text-amber-800';
+                else if (statusTampil === 'Expired') badgeColor = 'bg-gray-800 text-white';
+                else if (isKritis) badgeColor = 'bg-red-600 text-white animate-pulse';
+
+                return `
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="p-4 font-medium text-gray-700">${item.tanggal_penerimaan}</td>
+                        <td class="p-4 font-bold text-dark-azure">${item.no_shipment}</td>
+                        <td class="p-4">${item.nama_delman && item.nama_delman !== 'null' ? item.nama_delman : '-'}</td>
+                        <td class="p-4">${item.nopol_kendaraan && item.nopol_kendaraan !== 'null' ? item.nopol_kendaraan : '-'}</td>
+                        <td class="p-4">${item.jenis_gr}</td>
+                        <td class="p-4 font-medium">${palets}</td>
+                        <td class="p-4"><span class="px-3 py-1 rounded-full text-[10px] md:text-xs font-bold ${badgeColor}">${isKritis ? 'Kritis (H+3)' : statusTampil}</span></td>
+                    </tr>
+                `;
+            }).join('');
         }
 
-        function downloadLaporanKustom() {
-            if(dataLaporanKustom.length === 0) {
-                alert("Tidak ada data untuk di-export. Silakan klik Tampilkan Data terlebih dahulu.");
-                return;
-            }
-            
+        async function downloadLaporanKustom() {
             const start = document.getElementById('filter-start-date').value;
             const end = document.getElementById('filter-end-date').value;
             
-            const ws = XLSX.utils.json_to_sheet(dataLaporanKustom);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Rekap Kustom");
+            if (!start || !end) return alert('Pilih tanggal awal dan akhir terlebih dahulu!');
             
-            let fileName = "";
-            if(start === end) {
-                fileName = `Rekap redel - ${formatTanggalIndo(start)}.xlsx`;
+            const { data } = await _supabase.from('skr_redel').select('*, penempatan(nomor_palet)').gte('tanggal_penerimaan', start).lte('tanggal_penerimaan', end).order('tanggal_penerimaan', { ascending: true });
+            
+            if (data && data.length > 0) {
+                generateExcelStyled(data, `Laporan_SKR_${start}_to_${end}`);
             } else {
-                fileName = `Rekap redel - ${formatTanggalIndo(start)} sd ${formatTanggalIndo(end)}.xlsx`;
+                alert('Tidak ada data untuk didownload pada rentang tanggal tersebut!');
             }
-            
-            XLSX.writeFile(wb, fileName);
         }
+
         fetchMetrics();
     </script>
 </body>
