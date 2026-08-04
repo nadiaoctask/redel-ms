@@ -442,7 +442,6 @@
     </div>
 
     <!-- MODAL EDIT SKR -->
-    <!-- MODAL EDIT SKR -->
     <div id="modal-edit-skr" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center hidden z-50 p-4">
         <div class="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4">
             <h4 class="font-bold text-dark-azure text-base border-b pb-3">Edit Data SKR</h4>
@@ -463,11 +462,17 @@
                             <option value="Turun gudang">Turun Gudang</option>
                         </select>
                     </div>
-                    <div class="md:col-span-1">
-                        <label class="block text-xs font-semibold mb-1">Nomor Palet</label>
-                        <select id="edit-skr-palet" class="w-full px-4 py-2 rounded-xl border text-sm bg-white focus:border-dark-azure focus:outline-none">
-                            <!-- Option palet akan dimuat via JS -->
-                        </select>
+                    <div>
+                        <label class="block text-xs font-semibold mb-1">ID Palet</label>
+                        <div class="relative w-full">
+                            <button type="button" onclick="document.getElementById('edit-palet-dropdown').classList.toggle('hidden')" class="w-full px-4 py-2 rounded-xl border text-sm text-left bg-white focus:border-dark-azure flex justify-between items-center outline-none">
+                                <span id="edit-palet-selected-text" class="truncate text-gray-500">Pilih Palet...</span>
+                                <i class="fa-solid fa-chevron-down text-gray-400"></i>
+                            </button>
+                            <div id="edit-palet-dropdown" class="hidden absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-xl max-h-48 overflow-y-auto">
+                                <!-- Checkbox list dimuat via JS -->
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
@@ -789,6 +794,11 @@
             const btn = menu?.previousElementSibling;
             if (menu && !menu.classList.contains('hidden') && !menu.contains(event.target) && !btn.contains(event.target)) {
                 menu.classList.add('hidden');
+            }
+            const editMenu = document.getElementById('edit-palet-dropdown');
+            const editBtn = editMenu?.previousElementSibling;
+            if (editMenu && !editMenu.classList.contains('hidden') && !editMenu.contains(event.target) && !editBtn.contains(event.target)) {
+                editMenu.classList.add('hidden');
             }
         });
 
@@ -1173,6 +1183,9 @@
         function closeEditModal(modalId) { 
             document.getElementById(modalId).classList.add('hidden'); 
         }
+        // =====================================
+    // EDIT SKR (DENGAN MULTI-SELECT PALET)
+    // =====================================
         async function bukaEditSKR(oldId, tgl, delman, nopol, jenis, paletString) {
             document.getElementById('edit-skr-old-id').value = oldId;
             document.getElementById('edit-skr-id').value = oldId; 
@@ -1181,25 +1194,45 @@
             document.getElementById('edit-skr-nopol').value = (!nopol || nopol === 'null' || nopol === '-') ? '' : nopol;
             document.getElementById('edit-skr-jenis').value = jenis;
 
-            // Ambil palet lama (asumsi ngambil 1 palet utama jika ada lebih dari 1)
-            const oldPalet = (!paletString || paletString === '-') ? '' : paletString.split(',')[0].trim();
-            document.getElementById('edit-skr-old-palet').value = oldPalet;
+            // Ubah string "Palet A, Palet B" jadi array
+            const oldPalets = (!paletString || paletString === '-') ? [] : paletString.split(',').map(s => s.trim());
+            document.getElementById('edit-skr-old-palet').value = JSON.stringify(oldPalets); // Simpan di hidden input
 
-            // Render Dropdown Palet
-            const selectPalet = document.getElementById('edit-skr-palet');
-            const { data } = await _supabase.from('palet').select('nomor_palet').eq('status_palet', 'Available');
+            // Render Dropdown Checkbox
+            const menu = document.getElementById('edit-palet-dropdown');
+            const { data } = await _supabase.from('palet').select('*').order('nomor_palet');
             
-            let options = `<option value="">-- Tidak pakai palet --</option>`;
-            if (oldPalet) {
-                options += `<option value="${oldPalet}" selected>${oldPalet} (Palet saat ini)</option>`;
-            }
             if (data && data.length > 0) {
-                options += data.map(p => `<option value="${p.nomor_palet}">${p.nomor_palet}</option>`).join('');
+                menu.innerHTML = data.map(p => {
+                    const isChecked = oldPalets.includes(p.nomor_palet) ? 'checked' : '';
+                    const statusBadge = p.status_palet === 'In Use' ? '<span class="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded ml-auto">In Use</span>' : '';
+                    
+                    return `
+                    <label class="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-0 transition w-full">
+                        <input type="checkbox" name="edit_palet_pilihan" value="${p.nomor_palet}" onchange="updateEditSelectedPaletText()" class="w-4 h-4 text-dark-azure rounded border-gray-300" ${isChecked}>
+                        <span class="text-xs font-medium text-gray-700">${p.nomor_palet}</span>
+                        ${statusBadge}
+                    </label>
+                    `;
+                }).join('');
             }
-            selectPalet.innerHTML = options;
-            if(oldPalet) selectPalet.value = oldPalet; // Pastikan terpilih (Pre-filled)
-
+            
+            updateEditSelectedPaletText();
             document.getElementById('modal-edit-skr').classList.remove('hidden');
+        }
+
+        // Fungsi kecil untuk update tulisan "Pilih Palet..." di modal edit
+        function updateEditSelectedPaletText() {
+            const selected = Array.from(document.querySelectorAll('input[name="edit_palet_pilihan"]:checked')).map(cb => cb.value);
+            const textSpan = document.getElementById('edit-palet-selected-text');
+            
+            if (selected.length === 0) {
+                textSpan.textContent = 'Pilih Palet...';
+                textSpan.classList.replace('text-gray-900', 'text-gray-500');
+            } else {
+                textSpan.textContent = selected.join(', ');
+                textSpan.classList.replace('text-gray-500', 'text-gray-900');
+            }
         }
 
         async function updateSKR(e) {
@@ -1211,10 +1244,11 @@
             const nopol = document.getElementById('edit-skr-nopol').value;
             const jenis = document.getElementById('edit-skr-jenis').value;
             
-            const oldPalet = document.getElementById('edit-skr-old-palet').value;
-            const newPalet = document.getElementById('edit-skr-palet').value;
+            // Ambil array palet lama & baru
+            const oldPalets = JSON.parse(document.getElementById('edit-skr-old-palet').value || '[]');
+            const newPalets = Array.from(document.querySelectorAll('input[name="edit_palet_pilihan"]:checked')).map(cb => cb.value);
 
-            // 1. Update SKR Utama
+            // 1. Update Tabel SKR
             const { error: errSkr } = await _supabase.from('skr_redel').update({ 
                 no_shipment: newId, 
                 tanggal_penerimaan: tgl,
@@ -1228,24 +1262,27 @@
                 return;
             }
 
-            // 2. Logika Tukar Palet (Jika palet diubah)
-            if (oldPalet !== newPalet) {
-                // A. Lepas palet lama (jadikan Available)
-                if (oldPalet) {
-                    // Kita pakai id shipment yang baru (newId) jaga-jaga kalau no_shipment-nya juga ikut diubah user
-                    await _supabase.from('penempatan').delete().eq('nomor_palet', oldPalet);
-                    await _supabase.from('palet').update({ status_palet: 'Available' }).eq('nomor_palet', oldPalet);
-                }
-                // B. Pasang palet baru (jadikan In Use)
-                if (newPalet) {
-                    await _supabase.from('penempatan').insert([{ no_shipment: newId, nomor_palet: newPalet }]);
-                    await _supabase.from('palet').update({ status_palet: 'In Use' }).eq('nomor_palet', newPalet);
-                }
+            // 2. Logic Tukar Multi-Palet
+            // A. Hapus semua relasi palet lama untuk no_shipment ini
+            await _supabase.from('penempatan').delete().eq('no_shipment', newId);
+            
+            // B. Masukkan relasi palet yang baru dicentang
+            if (newPalets.length > 0) {
+                const penempatanData = newPalets.map(p => ({ no_shipment: newId, nomor_palet: p }));
+                await _supabase.from('penempatan').insert(penempatanData);
+                
+                // Ubah status palet baru jadi In Use
+                await _supabase.from('palet').update({ status_palet: 'In Use' }).in('nomor_palet', newPalets);
+            }
+
+            // C. (Opsional) Cek palet lama yang dilepas, ubah jadi Available
+            const dilepas = oldPalets.filter(p => !newPalets.includes(p));
+            if (dilepas.length > 0) {
+                await _supabase.from('palet').update({ status_palet: 'Available' }).in('nomor_palet', dilepas);
             }
 
             closeEditModal('modal-edit-skr'); 
             renderTableInbound(); 
-            if(typeof loadDropdownPalet === "function") loadDropdownPalet(); // Refresh form penerimaan di latar
         }
 
         // EDIT REDELIVERY LENGKAP
