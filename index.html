@@ -20,6 +20,8 @@
             }
         }
     </script>
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
 </head>
 <body class="bg-bg-gray font-sans h-screen flex flex-col md:flex-row overflow-hidden">
     <div id="screen-auth" class="fixed inset-0 bg-slate-900 z-[100] flex items-center justify-center hidden">
@@ -943,7 +945,14 @@
         }
 
         // --- FORM REDELIVERY LOGIC (FIXED) ---
-        let availableSkrList = [];
+        let optionsSKR = '<option value="" disabled selected>Pilih No SKR...</option>';
+        async function getOptionsSKR() {
+            const { data } = await _supabase.from('skr_redel').select('no_shipment');
+            if (data) {
+                optionsSKR += data.map(item => `<option value="${item.no_shipment}">${item.no_shipment}</option>`).join('');
+            }
+        }
+        getOptionsSKR();
         async function initRedeliveryForm() {
             const container = document.getElementById('redel-items-container');
             container.innerHTML = '';
@@ -952,51 +961,63 @@
             addRedelRow();
         }
 
-            function addRedelRow() {
+        function addRedelRow() {
             const container = document.getElementById('redel-items-container');
-            const rowIdx = container.children.length;
-            const row = document.createElement('div');
+            const rowId = 'skr-' + Date.now(); 
             
-            // Kita ubah grid layout: HP = 2 kolom, Desktop = 12 kolom
-            row.className = "grid grid-cols-2 md:grid-cols-12 gap-3 md:gap-4 items-start md:items-end bg-gray-50 p-3 md:p-4 rounded-xl border text-xs relative";
+            const div = document.createElement('div');
+            div.className = "p-4 md:p-5 border border-gray-200 rounded-xl mb-3 relative bg-gray-50/30";
             
-            const options = availableSkrList.length > 0 
-                ? availableSkrList.map(s => `<option value="${s}">${s}</option>`).join('')
-                : `<option value="">Tidak ada SKR yang perlu dikirim</option>`;
+            div.innerHTML = `
+                <!-- Tombol hapus (X) di pojok kanan atas -->
+                <button type="button" onclick="this.parentElement.remove()" class="absolute -top-2.5 -right-2.5 bg-red-100 text-red-500 rounded-full w-7 h-7 flex items-center justify-center hover:bg-red-500 hover:text-white transition">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
 
-            row.innerHTML = `
-                <!-- Kolom 1: SKR (HP: Full baris, Desktop: 5 kolom) -->
-                <div class="col-span-2 md:col-span-5">
-                    <label class="block font-semibold mb-1 text-gray-500">No. SKR</label>
-                    <input type="text" class="redel-skr-input w-full px-3 py-2.5 rounded-lg border bg-white focus:border-dark-azure outline-none pr-10 cursor-pointer" placeholder="Pilih/Ketik SKR..." onfocus="bukaDropdown(this)" oninput="filterDropdown(this)" autocomplete="off" required>
-                    <i class="fa-solid fa-chevron-down absolute right-3 top-10 text-gray-400 pointer-events-none"></i>
-        
-                    <!-- List Pilihan yang melayang (Awalnya Hidden) -->
-                    <ul class="skr-dropdown-list absolute z-50 bg-white w-full border border-gray-200 rounded-lg shadow-lg mt-1 hidden max-h-48 overflow-y-auto"></ul>
-                </div>
-                <!-- Kolom 2: Jenis Redel (HP: 1 kolom (kiri), Desktop: 3 kolom) -->
-                <div class="col-span-1 md:col-span-3">
-                    <label class="block font-semibold mb-1 text-gray-500">Jenis Redel</label>
-                    <div class="flex gap-3 h-[38px] items-center">
-                        <label class="cursor-pointer flex items-center gap-1.5"><input type="radio" name="j_redel_${rowIdx}" value="Parsial" checked onchange="toggleFinalCheck(this)"> Parsial</label>
-                        <label class="cursor-pointer flex items-center gap-1.5"><input type="radio" name="j_redel_${rowIdx}" value="Full" onchange="toggleFinalCheck(this)"> Full</label>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                    <!-- Kolom 1: No. SKR (Select) -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-500 mb-2">No. SKR</label>
+                        <select id="${rowId}" name="skr_diangkut[]" class="redel-skr-select w-full px-4 py-2.5 rounded-lg border bg-white focus:border-dark-azure outline-none text-sm" required>
+                            ${optionsSKR}
+                        </select>
                     </div>
-                </div>
-                
-                <!-- Kolom 3: Kiriman Terakhir (HP: 1 kolom (kanan), Desktop: 3 kolom) -->
-                <div class="col-span-1 md:col-span-3 final-box">
-                    <label class="block font-semibold mb-1 text-gray-500">Kiriman Terakhir?</label>
-                    <div class="h-[38px] flex items-center">
-                        <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" class="redel-final-check"> Ya, Habis</label>
+
+                    <!-- Kolom 2: Jenis Redel (Radio) -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-500 mb-2">Jenis Redel</label>
+                        <div class="flex items-center gap-4 h-[42px]">
+                            <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                <input type="radio" name="jenis_redel_${rowId}" value="Parsial" checked class="w-4 h-4 accent-blue-600"> Parsial
+                            </label>
+                            <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                <input type="radio" name="jenis_redel_${rowId}" value="Full" class="w-4 h-4 accent-blue-600"> Full
+                            </label>
+                        </div>
                     </div>
-                </div>
-                
-                <!-- Kolom 4: Delete Button (Otomatis menyesuaikan) -->
-                <div class="col-span-2 md:col-span-1 flex justify-end md:justify-center mt-1 md:mt-0">
-                    ${rowIdx > 0 ? `<button type="button" onclick="this.parentElement.parentElement.remove()" class="w-full md:w-10 h-10 bg-red-100 hover:bg-red-200 text-red-600 font-bold text-sm rounded-lg transition flex items-center justify-center gap-2"><i class="fa-solid fa-trash"></i><span class="md:hidden">Hapus Baris</span></button>` : '<div class="hidden md:block w-10 h-10"></div>'}
+
+                    <!-- Kolom 3: Kiriman Terakhir? (Checkbox) -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-500 mb-2">Kiriman Terakhir?</label>
+                        <div class="flex items-center h-[42px]">
+                            <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                <input type="checkbox" name="is_final_${rowId}" value="true" class="w-4 h-4 rounded border-gray-300 accent-blue-600"> Ya, Habis
+                            </label>
+                        </div>
+                    </div>
                 </div>
             `;
-            container.appendChild(row);
+
+            container.appendChild(div);
+
+            // 3. JADIKAN SELECT BISA DIKETIK / DIFILTER (PAKAI TOM SELECT)
+            // Syaratnya: Kamu harus udah masukin link CSS & JS Tom Select di file HTML-mu ya!
+            if (typeof TomSelect !== 'undefined') {
+                new TomSelect(`#${rowId}`, {
+                    create: false,
+                    sortField: { field: "text", direction: "asc" }
+                });
+            }
         }
 
         function toggleFinalCheck(radio) {
@@ -1360,53 +1381,43 @@
 
         // EDIT REDELIVERY LENGKAP
         async function bukaEditRedel(oldId, tgl, delman, nopol) {
-            // 1. Isi inputan form modal
             document.getElementById('edit-redel-old-id').value = oldId;
             document.getElementById('edit-redel-id').value = oldId;
             document.getElementById('edit-redel-tgl').value = tgl;
             document.getElementById('edit-redel-delman').value = delman === 'null' ? '' : delman;
             document.getElementById('edit-redel-nopol').value = nopol === 'null' ? '' : nopol;
             
-            // 2. Tampilkan status loading di area detail SKR
             const infoBox = document.getElementById('edit-redel-info-skr');
             if (infoBox) infoBox.innerHTML = '<span class="text-gray-500 text-xs italic animate-pulse">Memuat detail SKR...</span>';
             
-            // 3. Buka Modal
             document.getElementById('modal-edit-redel').classList.remove('hidden');
 
-            // 4. Tarik data dari tabel detail_redel dan join ke tabel skr_redel
+            // --- PROSES CEK DATABASE ---
+            console.log("Sedang mencari data Redel untuk ID:", oldId);
+
             const { data, error } = await _supabase
                 .from('detail_redel')
                 .select(`
                     no_shipment,
                     jenis_redel,
-                    is_final_delivery,
                     skr_redel (jenis_gr)
                 `)
                 .eq('no_shipment_redel', oldId);
 
-            // 5. Render data SKR yang didapat
+            // TAMPILKAN HASILNYA DI CONSOLE BROWSER
+            console.log("Hasil Data dari Supabase:", data);
+            console.log("Apakah ada Error dari Supabase?:", error);
+
             if (data && data.length > 0 && infoBox) {
-                // Karena 1 Redel bisa bawa banyak SKR, kita looping pakai map()
                 const htmlSKR = data.map(item => {
                     const jenisGR = item.skr_redel ? item.skr_redel.jenis_gr : '-';
-                    const badgeTipe = item.jenis_redel === 'Full' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700';
-                    
-                    return `
-                        <div class="mb-1.5 flex items-center gap-2">
-                            <i class="fa-solid fa-box text-blue-300 text-xs"></i>
-                            <span class="font-bold text-gray-800">${item.no_shipment}</span> 
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${badgeTipe}">${item.jenis_redel}</span>
-                            <span class="text-[10px] text-gray-500">(${jenisGR})</span>
-                        </div>
-                    `;
+                    return `<div class="mb-1"><span class="font-bold">${item.no_shipment}</span> (${item.jenis_redel} - ${jenisGR})</div>`;
                 }).join('');
-                
                 infoBox.innerHTML = htmlSKR;
             } else if (error && infoBox) {
-                infoBox.innerHTML = `<span class="text-red-500 text-xs">Gagal menarik data detail: ${error.message}</span>`;
+                infoBox.innerHTML = `<span class="text-red-500 text-xs">Error Sistem: ${error.message}</span>`;
             } else if (infoBox) {
-                infoBox.innerHTML = `<span class="text-gray-500 text-xs">Tidak ada data SKR terkait.</span>`;
+                infoBox.innerHTML = `<span class="text-gray-500 text-xs">Tabel detail_redel kosong untuk ID ini.</span>`;
             }
         }
 
