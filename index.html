@@ -970,9 +970,7 @@
             
             div.innerHTML = `
                 <!-- Tombol hapus (X) di pojok kanan atas -->
-                <button type="button" onclick="this.parentElement.remove()" class="absolute -top-2.5 -right-2.5 bg-red-100 text-red-500 rounded-full w-7 h-7 flex items-center justify-center hover:bg-red-500 hover:text-white transition">
-                    <i class="fa-solid fa-xmark text-sm"></i>
-                </button>
+                
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
                     <!-- Kolom 1: No. SKR (Select) -->
@@ -1004,6 +1002,9 @@
                                 <input type="checkbox" name="is_final_${rowId}" value="true" class="w-4 h-4 rounded border-gray-300 accent-blue-600"> Ya, Habis
                             </label>
                         </div>
+                    </div>
+                    <div class="col-span-2 md:col-span-1 flex justify-end md:justify-center mt-1 md:mt-0">
+                    ${rowIdx > 0 ? `<button type="button" onclick="this.parentElement.parentElement.remove()" class="w-full md:w-10 h-10 bg-red-100 hover:bg-red-200 text-red-600 font-bold text-sm rounded-lg transition flex items-center justify-center gap-2"><i class="fa-solid fa-trash"></i><span class="md:hidden">Hapus Baris</span></button>` : '<div class="hidden md:block w-10 h-10"></div>'}
                     </div>
                 </div>
             `;
