@@ -968,9 +968,12 @@
                 <!-- Kolom 1: SKR (HP: Full baris, Desktop: 5 kolom) -->
                 <div class="col-span-2 md:col-span-5">
                     <label class="block font-semibold mb-1 text-gray-500">No. SKR</label>
-                    <input type="text" list="list-skr-global" class="redel-skr-select w-full px-3 py-2.5 rounded-lg border bg-white focus:border-dark-azure outline-none" placeholder="Ketik atau pilih No SKR..." required autocomplete="off">
+                    <input type="text" class="redel-skr-input w-full px-3 py-2.5 rounded-lg border bg-white focus:border-dark-azure outline-none pr-10 cursor-pointer" placeholder="Pilih/Ketik SKR..." onfocus="bukaDropdown(this)" oninput="filterDropdown(this)" autocomplete="off" required>
+                    <i class="fa-solid fa-chevron-down absolute right-3 top-10 text-gray-400 pointer-events-none"></i>
+        
+                    <!-- List Pilihan yang melayang (Awalnya Hidden) -->
+                    <ul class="skr-dropdown-list absolute z-50 bg-white w-full border border-gray-200 rounded-lg shadow-lg mt-1 hidden max-h-48 overflow-y-auto"></ul>
                 </div>
-                
                 <!-- Kolom 2: Jenis Redel (HP: 1 kolom (kiri), Desktop: 3 kolom) -->
                 <div class="col-span-1 md:col-span-3">
                     <label class="block font-semibold mb-1 text-gray-500">Jenis Redel</label>
@@ -1357,32 +1360,53 @@
 
         // EDIT REDELIVERY LENGKAP
         async function bukaEditRedel(oldId, tgl, delman, nopol) {
+            // 1. Isi inputan form modal
             document.getElementById('edit-redel-old-id').value = oldId;
             document.getElementById('edit-redel-id').value = oldId;
             document.getElementById('edit-redel-tgl').value = tgl;
             document.getElementById('edit-redel-delman').value = delman === 'null' ? '' : delman;
             document.getElementById('edit-redel-nopol').value = nopol === 'null' ? '' : nopol;
-            if (document.getElementById('edit-redel-info-skr')) {
-                document.getElementById('edit-redel-info-skr').innerHTML = 'Memuat detail SKR...';
-            }
+            
+            // 2. Tampilkan status loading di area detail SKR
+            const infoBox = document.getElementById('edit-redel-info-skr');
+            if (infoBox) infoBox.innerHTML = '<span class="text-gray-500 text-xs italic animate-pulse">Memuat detail SKR...</span>';
+            
+            // 3. Buka Modal
             document.getElementById('modal-edit-redel').classList.remove('hidden');
 
+            // 4. Tarik data dari tabel detail_redel dan join ke tabel skr_redel
             const { data, error } = await _supabase
-                .from('redelivery')
-                .select('*, skr_redel(no_shipment, jenis_gr)') 
-                .eq('no_shipment_redel', oldId) 
-                .single();
+                .from('detail_redel')
+                .select(`
+                    no_shipment,
+                    jenis_redel,
+                    is_final_delivery,
+                    skr_redel (jenis_gr)
+                `)
+                .eq('no_shipment_redel', oldId);
 
-            // 5. Injek teks ke dalam modal jika datanya berhasil ditarik
-            if (data && document.getElementById('edit-redel-info-skr')) {
-                // Gunakan syntax yang sudah aku sesuaikan
-                const teksInfo = `No: <b>${data.skr_redel?.no_shipment || '-'}</b> (${data.skr_redel?.jenis_gr || '-'})`;
-                document.getElementById('edit-redel-info-skr').innerHTML = teksInfo;
-            } else if (error) {
-                // Tampilkan pesan error jika gagal terhubung
-                if(document.getElementById('edit-redel-info-skr')) {
-                    document.getElementById('edit-redel-info-skr').innerHTML = `<span class="text-red-500 text-xs">Data SKR tidak ditemukan</span>`;
-                }
+            // 5. Render data SKR yang didapat
+            if (data && data.length > 0 && infoBox) {
+                // Karena 1 Redel bisa bawa banyak SKR, kita looping pakai map()
+                const htmlSKR = data.map(item => {
+                    const jenisGR = item.skr_redel ? item.skr_redel.jenis_gr : '-';
+                    const badgeTipe = item.jenis_redel === 'Full' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700';
+                    
+                    return `
+                        <div class="mb-1.5 flex items-center gap-2">
+                            <i class="fa-solid fa-box text-blue-300 text-xs"></i>
+                            <span class="font-bold text-gray-800">${item.no_shipment}</span> 
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${badgeTipe}">${item.jenis_redel}</span>
+                            <span class="text-[10px] text-gray-500">(${jenisGR})</span>
+                        </div>
+                    `;
+                }).join('');
+                
+                infoBox.innerHTML = htmlSKR;
+            } else if (error && infoBox) {
+                infoBox.innerHTML = `<span class="text-red-500 text-xs">Gagal menarik data detail: ${error.message}</span>`;
+            } else if (infoBox) {
+                infoBox.innerHTML = `<span class="text-gray-500 text-xs">Tidak ada data SKR terkait.</span>`;
             }
         }
 
@@ -1687,16 +1711,30 @@
         }
 
         document.addEventListener("DOMContentLoaded", () => cekLogin());
-    
-        async function cariSuggestion(keyword) {
+        
+        // 1. Siapkan wadah untuk nampung semua nomor SKR
+        let semuaSKR = [];
+
+        // 2. Panggil fungsi ini 1x saat halaman web baru dibuka (taruh di paling bawah kodingan JS-mu bareng fungsi load lain)
+        async function tarikDataUntukSearch() {
+            const { data } = await _supabase.from('skr_redel').select('no_shipment');
+            if (data) semuaSKR = data;
+        }
+        tarikDataUntukSearch(); // Langsung jalankan
+
+        // 3. Timpa fungsi cariSuggestion lama dengan yang ini
+        function cariSuggestion(keyword) {
             const box = document.getElementById('box-suggestion');
-            if (!keyword || keyword.length < 3) { box.classList.add('hidden'); return; }
+            if (!keyword) { box.classList.add('hidden'); return; }
             
-            const { data } = await _supabase.from('skr_redel').select('no_shipment').ilike('no_shipment', `%${keyword}%`).limit(5);
+            // Kita filter datanya pakai JavaScript (paksa jadi teks dulu biar angka bisa dicari)
+            const hasilFilter = semuaSKR.filter(item => String(item.no_shipment).includes(keyword)).slice(0, 5);
             
-            if (data && data.length > 0) {
-                box.innerHTML = data.map(item => 
-                    `<li onclick="pilihSuggestion('${item.no_shipment}')" class="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b text-sm font-medium text-gray-700"><i class="fa-solid fa-box mr-2 text-gray-400"></i> ${item.no_shipment}</li>`
+            if (hasilFilter.length > 0) {
+                box.innerHTML = hasilFilter.map(item => 
+                    `<li onclick="pilihSuggestion('${item.no_shipment}')" class="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b text-sm font-medium text-gray-700">
+                        <i class="fa-solid fa-box mr-2 text-gray-400"></i> ${item.no_shipment}
+                    </li>`
                 ).join('');
                 box.classList.remove('hidden');
             } else {
@@ -1704,7 +1742,7 @@
                 box.classList.remove('hidden');
             }
         }
-
+        
         function pilihSuggestion(nomor) {
             document.getElementById('dash-search-input').value = nomor;
             document.getElementById('box-suggestion').classList.add('hidden');
@@ -1715,6 +1753,51 @@
             if(!e.target.closest('.relative.flex-1')) {
                 const box = document.getElementById('box-suggestion');
                 if(box) box.classList.add('hidden');
+            }
+        });
+    // Siapkan data opsi SKR secara global
+        let opsiSKR = [];
+        async function siapkanOpsiSKR() {
+            const { data } = await _supabase.from('skr_redel').select('no_shipment');
+            if (data) opsiSKR = data;
+        }
+        siapkanOpsiSKR(); // Panggil saat web diload
+
+        function bukaDropdown(inputEl) {
+            const ul = inputEl.nextElementSibling.nextElementSibling;
+            renderListDropdown(ul, opsiSKR, inputEl);
+            ul.classList.remove('hidden');
+        }
+
+        function filterDropdown(inputEl) {
+            const ul = inputEl.nextElementSibling.nextElementSibling;
+            const kataKunci = inputEl.value.toLowerCase();
+            const dataTersaring = opsiSKR.filter(item => String(item.no_shipment).toLowerCase().includes(kataKunci));
+            
+            renderListDropdown(ul, dataTersaring, inputEl);
+            ul.classList.remove('hidden');
+        }
+
+        function renderListDropdown(ul, dataList, inputEl) {
+            if(dataList.length === 0) {
+                ul.innerHTML = '<li class="p-3 text-sm text-gray-500">SKR tidak ditemukan</li>';
+                return;
+            }
+            ul.innerHTML = dataList.map(item => 
+                `<li class="p-3 text-sm hover:bg-gray-100 cursor-pointer font-medium" onmousedown="pilihSKR(this, '${item.no_shipment}')">${item.no_shipment}</li>`
+            ).join('');
+        }
+
+        function pilihSKR(liEl, nilai) {
+            const inputEl = liEl.parentElement.previousElementSibling.previousElementSibling;
+            inputEl.value = nilai;
+            liEl.parentElement.classList.add('hidden'); // Tutup dropdown
+        }
+
+        // Tutup dropdown kalau klik sembarang tempat di luar form
+        document.addEventListener('click', e => {
+            if(!e.target.classList.contains('redel-skr-input')) {
+                document.querySelectorAll('.skr-dropdown-list').forEach(ul => ul.classList.add('hidden'));
             }
         });
     </script>
