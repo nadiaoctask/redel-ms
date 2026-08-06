@@ -1114,8 +1114,7 @@
             const searchVal = document.getElementById('filter-search-skr').value.toLowerCase();
             const grVal = document.getElementById('filter-gr').value;
             const statusVal = document.getElementById('filter-status').value;
-            let { data } = await _supabase.from('skr_redel').select('*, penempatan(nomor_palet), detail_redel(*)');
-            
+            let { data } = await _supabase.from('skr_redel').select('*, penempatan(nomor_palet), detail_redel(*, redelivery(nama_delman, nopol_kendaraan))');
                 if(data) {
                 let expiredIds = [];
                 const hariIni = new Date();
@@ -1189,10 +1188,15 @@
                                     <div class="border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm">
                                         <table class="w-full text-left border-collapse">
                                             <thead class="bg-gray-100 text-gray-600 font-semibold border-b border-gray-200">
-                                                <tr><th class="py-2 px-3">No. Redel</th><th class="py-2 px-3">Jenis Redel</th><th class="py-2 px-3">Status Final</th></tr>
+                                                <tr>
+                                                    <th class="py-2 px-3">No. Redel</th>
+                                                    <th class="py-2 px-3">Nama DelMan</th>
+                                                    <th class="py-2 px-3">Nomor Kendaraan</th>
+                                                    <th class="py-2 px-3">Jenis Redel</th>
+                                                    <th class="py-2 px-3">Status Final</th></tr>
                                             </thead>
                                             <tbody class="divide-y divide-gray-100">
-                                                ${item.detail_redel.map(d => `<tr class="hover:bg-gray-50"><td class="py-2 px-3 font-bold text-dark-azure">${d.no_shipment_redel}</td><td class="py-2 px-3">${d.jenis_redel}</td><td class="py-2 px-3">${d.is_final_delivery ? '<span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-bold text-[10px]">Selesai</span>' : '<span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-bold text-[10px]">Parsial</span>'}</td></tr>`).join('')}
+                                                ${item.detail_redel.map(d => `<tr class="hover:bg-gray-50"><td class="py-2 px-3 font-bold text-dark-azure">${d.no_shipment_redel}</td><td class="py-2 px-3">${d.redelivery?.nama_delman || '-'}</td><td class="py-2 px-3">${d.redelivery?.nopol_kendaraan || '-'}</td><td class="py-2 px-3">${d.jenis_redel}</td><td class="py-2 px-3">${d.is_final_delivery ? '<span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-bold text-[10px]">Selesai</span>' : '<span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-bold text-[10px]">Parsial</span>'}</td></tr>`).join('')}
                                             </tbody>
                                         </table>
                                     </div>
@@ -1804,24 +1808,57 @@
         let semuaSKR = [];
 
         // 2. Panggil fungsi ini 1x saat halaman web baru dibuka (taruh di paling bawah kodingan JS-mu bareng fungsi load lain)
-        async function tarikDataUntukSearch() {
-            const { data } = await _supabase.from('skr_redel').select('no_shipment');
-            if (data) semuaSKR = data;
-        }
-        tarikDataUntukSearch(); // Langsung jalankan
+        // 1. Wadah data
+let semuaSKR = [];
 
-        // 3. Timpa fungsi cariSuggestion lama dengan yang ini
+// 2. Fungsi tarik data (Diperbarui dengan relasi)
+        async function tarikDataUntukSearch() {
+            // Tarik SKR beserta data Delman dari tabel redelivery via detail_redel
+            const { data } = await _supabase
+                .from('skr_redel')
+                .select(`
+                    no_shipment,
+                    detail_redel (
+                        redelivery (
+                            nama_delman,
+                            nopol_kendaraan
+                        )
+                    )
+                `);
+                
+            if (data) {
+                // Format ulang datanya biar rapi di memori
+                semuaSKR = data.map(item => {
+                    // Karena 1 SKR bisa redel parsial berkali-kali, kita ambil data redelivery yang paling akhir
+                    const listDetail = item.detail_redel || [];
+                    const lastRedel = listDetail.length > 0 ? listDetail[listDetail.length - 1].redelivery : null;
+                    
+                    return {
+                        no_shipment: item.no_shipment,
+                        delman: lastRedel?.nama_delman || 'Belum ada Delman',
+                        nopol: lastRedel?.nopol_kendaraan || '-'
+                    };
+                });
+            }
+        }
+        tarikDataUntukSearch();
+
+        // 3. Fungsi cetak suggestion (Diperbarui UI-nya)
         function cariSuggestion(keyword) {
             const box = document.getElementById('box-suggestion');
             if (!keyword) { box.classList.add('hidden'); return; }
             
-            // Kita filter datanya pakai JavaScript (paksa jadi teks dulu biar angka bisa dicari)
             const hasilFilter = semuaSKR.filter(item => String(item.no_shipment).includes(keyword)).slice(0, 5);
             
             if (hasilFilter.length > 0) {
                 box.innerHTML = hasilFilter.map(item => 
                     `<li onclick="pilihSuggestion('${item.no_shipment}')" class="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b text-sm font-medium text-gray-700">
-                        <i class="fa-solid fa-box mr-2 text-gray-400"></i> ${item.no_shipment}
+                        <div class="flex flex-col">
+                            <span><i class="fa-solid fa-box mr-2 text-blue-500"></i> ${item.no_shipment}</span>
+                            <span class="text-[10px] text-gray-400 ml-5 mt-0.5">
+                                <i class="fa-solid fa-truck-fast mr-1"></i> ${item.delman} (${item.nopol})
+                            </span>
+                        </div>
                     </li>`
                 ).join('');
                 box.classList.remove('hidden');
