@@ -744,7 +744,7 @@
                                                         <tr><th class="py-2 px-3">No. Redel</th><th class="py-2 px-3">Jenis Redel</th><th class="py-2 px-3">Status Final</th></tr>
                                                     </thead>
                                                     <tbody class="divide-y divide-gray-100">
-                                                        ${skrData.detail_redel.map(d => `<tr class="hover:bg-gray-50"><td class="py-2 px-3 font-bold text-dark-azure">${d.no_shipment_redel}</td><td class="py-2 px-3">${d.jenis_redel}</td><td class="py-2 px-3">${d.is_final_delivery ? '<span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-bold text-[10px]">✅ Selesai</span>' : '<span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-bold text-[10px]">❌ Parsial</span>'}</td></tr>`).join('')}
+                                                        ${skrData.detail_redel.map(d => `<tr class="hover:bg-gray-50"><td class="py-2 px-3 font-bold text-dark-azure">${d.no_shipment_redel}</td><td class="py-2 px-3">${d.jenis_redel}</td><td class="py-2 px-3">${d.is_final_delivery ? '<span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-bold text-[10px]">Selesai</span>' : '<span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-bold text-[10px]">Parsial</span>'}</td></tr>`).join('')}
                                                     </tbody>
                                                 </table>
                                             </div>
@@ -799,7 +799,7 @@
                                                         <tr><th class="py-2 px-3">No. SKR</th><th class="py-2 px-3">Jenis Redel</th><th class="py-2 px-3">Status Final</th></tr>
                                                     </thead>
                                                     <tbody class="divide-y divide-gray-100">
-                                                        ${redelData.detail_redel.map(d => `<tr class="hover:bg-gray-50"><td class="py-2 px-3 font-bold text-dark-azure">${d.no_shipment}</td><td class="py-2 px-3">${d.jenis_redel}</td><td class="py-2 px-3">${d.is_final_delivery ? '<span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-bold text-[10px]">✅ Cleared</span>' : '<span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-bold text-[10px]">❌ Parsial</span>'}</td></tr>`).join('')}
+                                                        ${redelData.detail_redel.map(d => `<tr class="hover:bg-gray-50"><td class="py-2 px-3 font-bold text-dark-azure">${d.no_shipment}</td><td class="py-2 px-3">${d.jenis_redel}</td><td class="py-2 px-3">${d.is_final_delivery ? '<span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-bold text-[10px]">Cleared</span>' : '<span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-bold text-[10px]">Parsial</span>'}</td></tr>`).join('')}
                                                     </tbody>
                                                 </table>
                                             </div>
@@ -977,7 +977,7 @@
             const row = document.createElement('div');
             
             // Layout grid bawaan aslimu (ditambah mb-3 biar ada jarak antar baris)
-            row.className = "grid grid-cols-2 md:grid-cols-12 gap-3 md:gap-4 items-start md:items-end bg-gray-50 p-3 md:p-4 rounded-xl border text-xs relative mb-3";
+            row.className = "grid grid-cols-2 md:grid-cols-12 gap-3 md:gap-4 items-start md:items-end bg-gray-50 p-3 md:p-4 rounded-xl border text-xs relative mb-3 baris-skr";
             
             // Tarik list SKR dari array yang sudah kamu siapkan (availableSkrList)
             const options = availableSkrList.length > 0 
@@ -1030,17 +1030,19 @@
         }
 
         function toggleFinalCheck(radioEl) {
-            const row = radioEl.closest('.edit-row-item, .flex, .grid'); // Cari bungkus barisnya
+            // Kita panggil class spesifik biar dia nggak nyasar ke div lain
+            const row = radioEl.closest('.baris-skr'); 
+            
             if (!row) return;
 
             const finalBox = row.querySelector('.final-box');
             const finalCheck = row.querySelector('input[type="checkbox"]');
 
             if (radioEl.value === 'Full') {
-                if (finalBox) finalBox.classList.add('invisible'); // Sembunyikan tapi jaga layout
+                if (finalBox) finalBox.classList.add('invisible'); 
                 if (finalCheck) finalCheck.checked = false; 
             } else {
-                if (finalBox) finalBox.classList.remove('invisible'); // Munculkan lagi
+                if (finalBox) finalBox.classList.remove('invisible'); 
             }
         }
 
@@ -1190,7 +1192,7 @@
                                                 <tr><th class="py-2 px-3">No. Redel</th><th class="py-2 px-3">Jenis Redel</th><th class="py-2 px-3">Status Final</th></tr>
                                             </thead>
                                             <tbody class="divide-y divide-gray-100">
-                                                ${item.detail_redel.map(d => `<tr class="hover:bg-gray-50"><td class="py-2 px-3 font-bold text-dark-azure">${d.no_shipment_redel}</td><td class="py-2 px-3">${d.jenis_redel}</td><td class="py-2 px-3">${d.is_final_delivery ? '<span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-bold text-[10px]">✅ Selesai</span>' : '<span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-bold text-[10px]">❌ Parsial</span>'}</td></tr>`).join('')}
+                                                ${item.detail_redel.map(d => `<tr class="hover:bg-gray-50"><td class="py-2 px-3 font-bold text-dark-azure">${d.no_shipment_redel}</td><td class="py-2 px-3">${d.jenis_redel}</td><td class="py-2 px-3">${d.is_final_delivery ? '<span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-bold text-[10px]">Selesai</span>' : '<span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-bold text-[10px]">Parsial</span>'}</td></tr>`).join('')}
                                             </tbody>
                                         </table>
                                     </div>
@@ -1247,7 +1249,7 @@
                                                 <tr class="hover:bg-gray-50">
                                                     <td class="py-2 px-3 font-bold text-dark-azure">${d.no_shipment}</td>
                                                     <td class="py-2 px-3">${d.jenis_redel}</td>
-                                                    <td class="py-2 px-3">${d.is_final_delivery ? '<span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-bold text-[10px]"> Cleared</span>' : '<span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-bold text-[10px]">❌ Parsial</span>'}</td>
+                                                    <td class="py-2 px-3">${d.is_final_delivery ? '<span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-bold text-[10px]">Cleared</span>' : '<span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-bold text-[10px]">Parsial</span>'}</td>
                                                 </tr>
                                             `).join('')}
                                         </tbody>
@@ -1892,7 +1894,7 @@
             const rowId = 'edit-skr-' + Date.now() + Math.floor(Math.random() * 1000);
             const row = document.createElement('div');
             
-            row.className = "flex flex-col md:flex-row gap-3 items-start md:items-end bg-white p-3 md:p-3.5 rounded-xl border text-xs relative edit-row-item shadow-sm";
+            row.className = "flex flex-col md:flex-row gap-3 items-start md:items-end bg-white p-3 md:p-3.5 rounded-xl border text-xs relative edit-row-item shadow-sm baris-skr";
 
             let arraySKR = [];
             if (typeof availableSkrList !== 'undefined') arraySKR = [...availableSkrList];
