@@ -699,7 +699,7 @@
             // 1. COBA CARI DI TABEL SKR
             const { data: skrData } = await _supabase
                 .from('skr_redel')
-                .select('*, penempatan(nomor_palet), detail_redel(*)')
+                .select('*, penempatan(nomor_palet), detail_redel(*, redelivery(nama_delman, nopol_kendaraan))')
                 .eq('no_shipment', searchInput)
                 .single();
 
@@ -741,10 +741,14 @@
                                             <div class="border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm">
                                                 <table class="w-full text-left border-collapse">
                                                     <thead class="bg-gray-100 text-gray-600 font-semibold border-b border-gray-200">
-                                                        <tr><th class="py-2 px-3">No. Redel</th><th class="py-2 px-3">Jenis Redel</th><th class="py-2 px-3">Status Final</th></tr>
+                                                        <tr><th class="py-2 px-3">No. Redel</th>
+                                                            <th class="py-2 px-3">Nama DelMan</th>
+                                                            <th class="py-2 px-3">Nomor Kendaraan</th>
+                                                            <th class="py-2 px-3">Jenis Redel</th>
+                                                            <th class="py-2 px-3">Status Final</th></tr>
                                                     </thead>
                                                     <tbody class="divide-y divide-gray-100">
-                                                        ${skrData.detail_redel.map(d => `<tr class="hover:bg-gray-50"><td class="py-2 px-3 font-bold text-dark-azure">${d.no_shipment_redel}</td><td class="py-2 px-3">${d.jenis_redel}</td><td class="py-2 px-3">${d.is_final_delivery ? '<span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-bold text-[10px]">Selesai</span>' : '<span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-bold text-[10px]">Parsial</span>'}</td></tr>`).join('')}
+                                                        ${skrData.detail_redel.map(d => `<tr class="hover:bg-gray-50"><td class="py-2 px-3 font-bold text-dark-azure">${d.no_shipment_redel}</td><td class="py-2 px-3">${d.redelivery?.nama_delman || '-'}</td><td class="py-2 px-3">${d.redelivery?.nopol_kendaraan || '-'}</td><td class="py-2 px-3">${d.jenis_redel}</td><td class="py-2 px-3">${d.is_final_delivery ? '<span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-bold text-[10px]">Selesai</span>' : '<span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-bold text-[10px]">Parsial</span>'}</td></tr>`).join('')}
                                                     </tbody>
                                                 </table>
                                             </div>
