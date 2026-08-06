@@ -1029,15 +1029,18 @@
             }
         }
 
-        function toggleFinalCheck(radio) {
-            // Cari class final-box yang ada di satu baris (row) yang sama
-            const finalBox = radio.closest('.grid').querySelector('.final-box');
-            
-            // Kita pakai visibility supaya tata letak (grid) nggak rusak pas disembunyikan
-            if(radio.value === 'Full') {
-                finalBox.style.visibility = 'hidden';
+        function toggleFinalCheck(radioEl) {
+            const row = radioEl.closest('.edit-row-item, .flex, .grid'); // Cari bungkus barisnya
+            if (!row) return;
+
+            const finalBox = row.querySelector('.final-box');
+            const finalCheck = row.querySelector('input[type="checkbox"]');
+
+            if (radioEl.value === 'Full') {
+                if (finalBox) finalBox.classList.add('invisible'); // Sembunyikan tapi jaga layout
+                if (finalCheck) finalCheck.checked = false; 
             } else {
-                finalBox.style.visibility = 'visible';
+                if (finalBox) finalBox.classList.remove('invisible'); // Munculkan lagi
             }
         }
 
@@ -1048,26 +1051,38 @@
             const nopol = document.getElementById('redel-nopol').value;
             const picName = localStorage.getItem('gudang_pic') || 'Sistem';
 
+            // 1. Insert ke tabel parent
             const { error } = await _supabase.from('redelivery').insert([{
                 no_shipment_redel: noRedel, nama_delman: namaDelman, nopol_kendaraan: nopol, tanggal_pengiriman: todayStr, pic_redel: picName
             }]);
 
             if(!error) {
                 const rows = document.getElementById('redel-items-container').children;
+                
+                // Looping setiap baris form SKR
                 for(let r of rows) {
-                    const skrVal = r.querySelector('.redel-skr-select').value;
-                    const jRedel = r.querySelector('input[type="radio"]:checked').value;
-                    const isFinal = jRedel === 'Full' ? true : r.querySelector('.redel-final-check').checked;
+                    // PENGAMAN: Kita cari class select yang baru (redel-skr-input) atau yang lama
+                    const skrEl = r.querySelector('.redel-skr-input') || r.querySelector('.redel-skr-select');
+                    if (!skrEl) continue; 
+                    
+                    const skrVal = skrEl.value;
+                    const jRedel = r.querySelector('input[type="radio"]:checked')?.value || 'Parsial';
+                    
+                    // Ambil nilai checkbox dengan aman
+                    const checkEl = r.querySelector('input[type="checkbox"]');
+                    const isFinal = jRedel === 'Full' ? true : (checkEl ? checkEl.checked : false);
 
                     if(skrVal) {
+                        // A. Masukkan ke detail_redel
                         await _supabase.from('detail_redel').insert([{
                             no_shipment_redel: noRedel, no_shipment: skrVal, jenis_redel: jRedel, is_final_delivery: isFinal
                         }]);
 
+                        // B. Update status SKR
                         const statusBaru = isFinal ? 'Selesai' : 'Parsial';
                         await _supabase.from('skr_redel').update({ status_skr: statusBaru }).eq('no_shipment', skrVal);
 
-                        // AUTO RELEASE PALET JIKA SELESAI
+                        // C. AUTO RELEASE PALET JIKA SELESAI (Kodingan Aslimu)
                         if(isFinal) {
                             const { data: pData } = await _supabase.from('penempatan').select('nomor_palet').eq('no_shipment', skrVal);
                             if(pData && pData.length > 0) {
@@ -1078,11 +1093,19 @@
                         }
                     }
                 }
+                
                 alert('Redelivery Berhasil Disimpan!');
+                
+                // Clear form dan Tom Select
                 e.target.reset();
-            } else alert('Gagal simpan Redelivery: ' + error.message);
+                document.querySelectorAll('.tomselected').forEach(el => {
+                    if(el.tomselect) el.tomselect.clear();
+                });
+                
+            } else {
+                alert('Gagal simpan Redelivery: ' + error.message);
+            }
         }
-
         // --- MONITORING LOGIC (PROTECTED DELETE & FILTERS) ---
         async function renderTableInbound() {
             const tbody = document.getElementById('tbody-inbound');
@@ -1426,21 +1449,76 @@
             const delman = document.getElementById('edit-redel-delman').value;
             const nopol = document.getElementById('edit-redel-nopol').value;
 
-            const { error } = await _supabase.from('redelivery').update({ 
+            // 1. Kumpulkan semua data SKR dari form
+            const rowElements = document.querySelectorAll('.edit-row-item');
+            const dataDetailsBaru = [];
+            
+            rowElements.forEach(row => {
+                const skr = row.querySelector('.edit-input-skr').value; 
+                const jenis = row.querySelector('.edit-input-jenis:checked')?.value || 'Parsial';
+                
+                // Ambil centang final (Jika Full, paksa jadi true)
+                const checkEl = row.querySelector('.edit-input-final');
+                const final = jenis === 'Full' ? true : (checkEl ? checkEl.checked : false);
+                
+                if (skr) {
+                    dataDetailsBaru.push({
+                        no_shipment_redel: newId,
+                        no_shipment: skr,
+                        jenis_redel: jenis,
+                        is_final_delivery: final
+                    });
+                }
+            });
+
+            if (dataDetailsBaru.length === 0) {
+                alert("Minimal harus ada 1 SKR yang diangkut!");
+                return;
+            }
+
+            // 2. Update Data Parent (Redelivery)
+            const { error: errRedel } = await _supabase.from('redelivery').update({ 
                 no_shipment_redel: newId,
                 tanggal_pengiriman: tgl, 
                 nama_delman: delman, 
                 nopol_kendaraan: nopol 
             }).eq('no_shipment_redel', oldId);
 
-            if(!error) { 
-                closeEditModal('modal-edit-redel'); 
-                renderTableOutbound(); 
-            } else { 
-                alert('Gagal Update Redelivery:\n' + error.message); 
+            if (errRedel) { 
+                alert('Gagal Update Redelivery Utama:\n' + errRedel.message); 
+                return; 
             }
-        }
 
+            // 3. SAPU BERSIH detail SKR lama di DB
+            await _supabase.from('detail_redel').delete().eq('no_shipment_redel', oldId);
+
+            // 4. INSERT detail SKR yang baru dari form
+            const { error: errDetail } = await _supabase.from('detail_redel').insert(dataDetailsBaru);
+
+            if (errDetail) { 
+                alert('Data Induk ter-update, tapi gagal menyimpan daftar SKR:\n' + errDetail.message); 
+                return;
+            }
+
+            // 5. UPDATE STATUS SKR & AUTO RELEASE PALET 
+            for (let detail of dataDetailsBaru) {
+                const statusBaru = detail.is_final_delivery ? 'Selesai' : 'Parsial';
+                await _supabase.from('skr_redel').update({ status_skr: statusBaru }).eq('no_shipment', detail.no_shipment);
+
+                if (detail.is_final_delivery) {
+                    const { data: pData } = await _supabase.from('penempatan').select('nomor_palet').eq('no_shipment', detail.no_shipment);
+                    if(pData && pData.length > 0) {
+                        for(let p of pData) {
+                            await _supabase.from('palet').update({ status_palet: 'Available' }).eq('nomor_palet', p.nomor_palet);
+                        }
+                    }
+                }
+            }
+
+            closeEditModal('modal-edit-redel'); 
+            renderTableOutbound(); 
+            alert("Data Redelivery Berhasil Diupdate!");
+        }
         function generateExcelStyled(data, filename) {
             const hariIni = new Date();
             hariIni.setHours(0,0,0,0);
@@ -1814,23 +1892,14 @@
             const rowId = 'edit-skr-' + Date.now() + Math.floor(Math.random() * 1000);
             const row = document.createElement('div');
             
-            // Layout responsif: ke bawah di HP, ke samping di Desktop
             row.className = "flex flex-col md:flex-row gap-3 items-start md:items-end bg-white p-3 md:p-3.5 rounded-xl border text-xs relative edit-row-item shadow-sm";
 
-            // PENGAMAN: Ambil list SKR dengan aman
             let arraySKR = [];
-            if (typeof availableSkrList !== 'undefined') {
-                arraySKR = [...availableSkrList];
-            } else if (typeof opsiSKR !== 'undefined') {
-                arraySKR = opsiSKR.map(item => item.no_shipment || item);
-            }
+            if (typeof availableSkrList !== 'undefined') arraySKR = [...availableSkrList];
+            else if (typeof opsiSKR !== 'undefined') arraySKR = opsiSKR.map(item => item.no_shipment || item);
 
-            // Pastikan SKR yang ditarik dari DB tetap ada di opsi, walaupun mungkin udah nggak ada di list 'available'
-            if (skrAwal && !arraySKR.includes(skrAwal)) {
-                arraySKR.push(skrAwal);
-            }
+            if (skrAwal && !arraySKR.includes(skrAwal)) arraySKR.push(skrAwal);
 
-            // Susun opsi HTML
             const options = `<option value="" disabled ${!skrAwal ? 'selected' : ''}>Pilih No SKR...</option>` + 
                 arraySKR.map(s => `<option value="${s}" ${s === skrAwal ? 'selected' : ''}>${s}</option>`).join('');
 
@@ -1845,12 +1914,14 @@
                 <div class="w-full md:w-3/12">
                     <label class="block font-semibold mb-1 text-gray-500">Jenis</label>
                     <div class="flex gap-3 h-[34px] items-center">
-                        <label class="cursor-pointer flex items-center gap-1.5"><input type="radio" name="edit_j_redel_${rowId}" value="Parsial" class="edit-input-jenis w-3.5 h-3.5" ${jenisAwal === 'Parsial' ? 'checked' : ''}> Parsial</label>
-                        <label class="cursor-pointer flex items-center gap-1.5"><input type="radio" name="edit_j_redel_${rowId}" value="Full" class="edit-input-jenis w-3.5 h-3.5" ${jenisAwal === 'Full' ? 'checked' : ''}> Full</label>
+                        <!-- TAMBAHAN ONCHANGE DI SINI -->
+                        <label class="cursor-pointer flex items-center gap-1.5"><input type="radio" name="edit_j_redel_${rowId}" value="Parsial" class="edit-input-jenis w-3.5 h-3.5" onchange="toggleFinalCheck(this)" ${jenisAwal === 'Parsial' ? 'checked' : ''}> Parsial</label>
+                        <label class="cursor-pointer flex items-center gap-1.5"><input type="radio" name="edit_j_redel_${rowId}" value="Full" class="edit-input-jenis w-3.5 h-3.5" onchange="toggleFinalCheck(this)" ${jenisAwal === 'Full' ? 'checked' : ''}> Full</label>
                     </div>
                 </div>
                 
-                <div class="w-full md:w-3/12">
+                <!-- TAMBAHAN CLASS final-box DI SINI -->
+                <div class="w-full md:w-3/12 final-box">
                     <label class="block font-semibold mb-1 text-gray-500">Kiriman Akhir?</label>
                     <div class="h-[34px] flex items-center">
                         <label class="flex items-center gap-1.5 cursor-pointer"><input type="checkbox" class="edit-input-final w-3.5 h-3.5 rounded border-gray-300" ${finalAwal ? 'checked' : ''}> Ya, Habis</label>
@@ -1866,7 +1937,10 @@
             
             container.appendChild(row);
 
-            // Tom Select inisialisasi
+            // Jalankan hide check otomatis saat awal diload jika jenisnya Full
+            const checkedRadio = row.querySelector('.edit-input-jenis:checked');
+            if (checkedRadio) toggleFinalCheck(checkedRadio);
+
             if (typeof TomSelect !== 'undefined') {
                 new TomSelect(`#${rowId}`, { create: false, sortField: { field: "text", direction: "asc" } });
             }
